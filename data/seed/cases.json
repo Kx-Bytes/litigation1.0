@@ -1,0 +1,277 @@
+[
+  {
+    "source": "animallaw.info",
+    "source_id": "aldf-v-usda-2019",
+    "doc_type": "case",
+    "jurisdiction": "US-9th-Cir",
+    "court": "U.S. Court of Appeals for the Ninth Circuit",
+    "decision_date": "2019-06-03",
+    "title": "Animal Legal Defense Fund v. U.S. Department of Agriculture",
+    "citation": "936 F.3d 882 (9th Cir. 2019)",
+    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-us-department-agriculture",
+    "full_text": "The Animal Legal Defense Fund (ALDF) brought suit challenging USDA regulations under the Animal Welfare Act (AWA) that excluded birds, rats, and mice from the definition of 'animal.' The Ninth Circuit held that ALDF had organizational standing to challenge the rule. The court found that ALDF demonstrated an injury in fact because the exclusion of these animals from AWA protections diverted organizational resources and frustrated ALDF's mission to protect animals from cruelty and exploitation. The court noted that organizations can establish standing by showing the challenged conduct caused them to divert resources from other activities. The court remanded for further proceedings on the merits.",
+    "metadata": {
+      "standing_type": "organizational",
+      "statute": "Animal Welfare Act",
+      "outcome": "remanded"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "aldf-v-wasden-2018",
+    "doc_type": "case",
+    "jurisdiction": "US-9th-Cir",
+    "court": "U.S. Court of Appeals for the Ninth Circuit",
+    "decision_date": "2018-07-26",
+    "title": "Animal Legal Defense Fund v. Wasden",
+    "citation": "878 F.3d 1184 (9th Cir. 2018)",
+    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-wasden",
+    "full_text": "The Ninth Circuit struck down Idaho's 'ag-gag' statute, which criminalized undercover investigations at agricultural facilities. The court held the law violated the First Amendment as a content-based restriction on speech. Applying strict scrutiny, the court found the state's interest in protecting agricultural operations did not justify criminalizing the act of gaining access by misrepresentation to document conditions. The decision is significant for animal-advocacy organizations that rely on undercover investigations to expose animal cruelty. The court also addressed whether the trespass-based provisions could be severed.",
+    "metadata": {
+      "constitutional_claim": "First Amendment",
+      "statute_type": "ag-gag",
+      "outcome": "statute struck down"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "aldf-v-otter-2015",
+    "doc_type": "case",
+    "jurisdiction": "US-9th-Cir",
+    "court": "U.S. Court of Appeals for the Ninth Circuit",
+    "decision_date": "2015-07-29",
+    "title": "Animal Legal Defense Fund v. Otter",
+    "citation": "789 F.3d 1019 (9th Cir. 2015)",
+    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-otter",
+    "full_text": "An earlier Ninth Circuit case challenging Idaho's ag-gag law at the preliminary injunction stage. The court affirmed a preliminary injunction blocking enforcement of portions of the statute that criminalized applying for employment at an agricultural operation with intent to cause economic injury. The court found plaintiffs demonstrated likelihood of success on the First Amendment claim because the law targeted protected speech activity. This case established the framework later applied in Wasden.",
+    "metadata": {
+      "constitutional_claim": "First Amendment",
+      "statute_type": "ag-gag",
+      "outcome": "preliminary injunction affirmed"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "aldf-v-herrera-2019",
+    "doc_type": "case",
+    "jurisdiction": "US-10th-Cir",
+    "court": "U.S. Court of Appeals for the Tenth Circuit",
+    "decision_date": "2019-07-23",
+    "title": "Animal Legal Defense Fund v. Herrera",
+    "citation": "935 F.3d 1228 (10th Cir. 2019)",
+    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-herrera",
+    "full_text": "The Tenth Circuit upheld New Mexico's ag-gag statute, reaching a different conclusion from the Ninth Circuit's Wasden decision. The court applied intermediate scrutiny rather than strict scrutiny, finding the statute was content-neutral because it targeted conduct (interference with agricultural operations) rather than the viewpoint of the speaker. The circuit split between this decision and Wasden creates significant jurisdictional variation in the constitutional protection available to undercover investigators at agricultural facilities.",
+    "metadata": {
+      "constitutional_claim": "First Amendment",
+      "statute_type": "ag-gag",
+      "outcome": "statute upheld",
+      "circuit_split": "conflicts with Wasden (9th Cir.)"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "havens-realty-1982",
+    "doc_type": "case",
+    "jurisdiction": "US",
+    "court": "U.S. Supreme Court",
+    "decision_date": "1982-02-24",
+    "title": "Havens Realty Corp. v. Coleman",
+    "citation": "455 U.S. 363 (1982)",
+    "source_url": "https://www.animallaw.info/case/havens-realty-corp-v-coleman",
+    "full_text": "The Supreme Court held that an organization has standing to sue when the challenged conduct has perceptibly impaired the organization's ability to provide services, thereby requiring the organization to divert resources to counteract the harm. This foundational standing doctrine is frequently invoked in animal-law cases where advocacy organizations challenge agency actions or statutes that harm their members or undermine their mission. The organization need not show that every member has direct personal harm if the organizational mission itself has been frustrated.",
+    "metadata": {
+      "standing_type": "organizational",
+      "doctrine": "resource-diversion standing",
+      "frequently_cited": true
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "lujan-v-defenders-1992",
+    "doc_type": "case",
+    "jurisdiction": "US",
+    "court": "U.S. Supreme Court",
+    "decision_date": "1992-06-12",
+    "title": "Lujan v. Defenders of Wildlife",
+    "citation": "504 U.S. 555 (1992)",
+    "source_url": "https://www.animallaw.info/case/lujan-v-defenders-wildlife",
+    "full_text": "The Supreme Court held that plaintiffs lacked Article III standing to challenge federal agency action abroad that threatened endangered species. The Court set out the three-part test for standing: (1) injury in fact that is concrete and particularized, and actual or imminent; (2) causal connection between the injury and the conduct complained of; and (3) redressability. The Court rejected the 'ecosystem nexus' and 'animal nexus' theories as insufficient to establish personal injury. This case defines the outer limits of environmental and animal-advocacy standing and is the primary authority defendants invoke to defeat standing claims.",
+    "metadata": {
+      "standing_type": "Article III",
+      "doctrine": "standing elements",
+      "frequently_cited": true,
+      "outcome": "standing denied"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "ca-foie-gras-2019",
+    "doc_type": "case",
+    "jurisdiction": "US-9th-Cir",
+    "court": "U.S. Court of Appeals for the Ninth Circuit",
+    "decision_date": "2019-09-16",
+    "title": "Association des Eleveurs de Canards et d'Oies du Quebec v. Becerra",
+    "citation": "936 F.3d 910 (9th Cir. 2019)",
+    "source_url": "https://www.animallaw.info/case/association-des-eleveurs-de-canards-et-doies-du-quebec-v-becerra",
+    "full_text": "The Ninth Circuit upheld California's ban on the sale of foie gras produced by force-feeding birds, rejecting a Dormant Commerce Clause challenge. The court held the statute regulated only in-state sales and did not discriminate against out-of-state commerce. The decision affirmed California's authority to enact animal-welfare legislation that effectively bars the import of products whose production methods violate California law, provided the regulation targets the sale rather than the production method directly.",
+    "metadata": {
+      "constitutional_claim": "Dormant Commerce Clause",
+      "outcome": "statute upheld"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "nat-meat-assoc-v-harris-2012",
+    "doc_type": "case",
+    "jurisdiction": "US",
+    "court": "U.S. Supreme Court",
+    "decision_date": "2012-01-23",
+    "title": "National Meat Association v. Harris",
+    "citation": "565 U.S. 452 (2012)",
+    "source_url": "https://www.animallaw.info/case/national-meat-association-v-harris",
+    "full_text": "The Supreme Court unanimously held that the Federal Meat Inspection Act (FMIA) preempted a California statute requiring immediate slaughter or euthanasia of nonambulatory pigs. The Court applied field and conflict preemption analysis, finding that Congress had occupied the field of slaughterhouse operations for pigs and that the California law stood as an obstacle to federal regulatory objectives. This case is the leading authority on federal preemption of state animal-welfare statutes in the agricultural context.",
+    "metadata": {
+      "doctrine": "federal preemption",
+      "statute": "Federal Meat Inspection Act",
+      "outcome": "state law preempted"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "orca-personhood-9th-cir-2012",
+    "doc_type": "case",
+    "jurisdiction": "US-9th-Cir",
+    "court": "U.S. Court of Appeals for the Ninth Circuit",
+    "decision_date": "2012-02-23",
+    "title": "Tilikum v. Sea World Parks & Entertainment, Inc.",
+    "citation": "842 F. Supp. 2d 1259 (S.D. Cal. 2012)",
+    "source_url": "https://www.animallaw.info/case/tilikum-v-sea-world-parks-entertainment-inc",
+    "full_text": "The Southern District of California dismissed a complaint brought by five orca whales as named plaintiffs under the Thirteenth Amendment's prohibition on involuntary servitude. The court held that the Thirteenth Amendment's protections extend only to humans, and that animals do not have standing to sue under the Constitution. While the case was dismissed, it represents a significant advocacy strategy and is frequently cited in discussions of animal legal personhood and standing.",
+    "metadata": {
+      "constitutional_claim": "Thirteenth Amendment",
+      "doctrine": "animal legal personhood",
+      "outcome": "dismissed"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "hs-v-cavel-7th-cir-2007",
+    "doc_type": "case",
+    "jurisdiction": "US-7th-Cir",
+    "court": "U.S. Court of Appeals for the Seventh Circuit",
+    "decision_date": "2007-07-17",
+    "title": "Humane Society of the United States v. Cavel International, Inc.",
+    "citation": "486 F.3d 1099 (7th Cir. 2007)",
+    "source_url": "https://www.animallaw.info/case/humane-society-united-states-v-cavel-international-inc",
+    "full_text": "The Seventh Circuit held that an Illinois statute banning horse slaughter was not preempted by federal law. The court rejected the argument that the Federal Meat Inspection Act occupied the field of horse slaughter, distinguishing horse slaughter facilities from the federal regulatory scheme for cattle and pigs. This decision stands in some tension with National Meat Association v. Harris and is important for advocates seeking to enforce state-level bans on particular practices not squarely covered by federal statutes.",
+    "metadata": {
+      "doctrine": "federal preemption",
+      "statute": "Federal Meat Inspection Act",
+      "outcome": "state law upheld"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "aldf-v-reynolds-8th-cir-2023",
+    "doc_type": "case",
+    "jurisdiction": "US-8th-Cir",
+    "court": "U.S. Court of Appeals for the Eighth Circuit",
+    "decision_date": "2023-02-09",
+    "title": "Animal Legal Defense Fund v. Reynolds",
+    "citation": "89 F.4th 1071 (8th Cir. 2023)",
+    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-reynolds",
+    "full_text": "The Eighth Circuit struck down Iowa's ag-gag statute as a First Amendment violation. Applying strict scrutiny, the court found that Iowa's law — which criminalized obtaining access to agricultural facilities under false pretenses — was a content-based restriction on speech. Iowa had argued the statute addressed fraud, but the court found the statute's targeting of animal-agriculture facilities specifically revealed discriminatory intent. The decision deepens the circuit split on ag-gag statutes: the Ninth Circuit (Wasden) and Eighth Circuit have struck down these laws, while the Tenth Circuit (Herrera) has upheld them.",
+    "metadata": {
+      "constitutional_claim": "First Amendment",
+      "statute_type": "ag-gag",
+      "outcome": "statute struck down",
+      "circuit_split": "aligns with Wasden (9th Cir.), conflicts with Herrera (10th Cir.)"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "north-american-meat-inst-2019",
+    "doc_type": "case",
+    "jurisdiction": "US-9th-Cir",
+    "court": "U.S. Court of Appeals for the Ninth Circuit",
+    "decision_date": "2019-09-16",
+    "title": "North American Meat Institute v. Becerra",
+    "citation": "929 F.3d 524 (9th Cir. 2019)",
+    "source_url": "https://www.animallaw.info/case/north-american-meat-institute-v-becerra",
+    "full_text": "The Ninth Circuit en banc upheld California's Proposition 12, which bans the in-state sale of pork products from farms that confine breeding pigs in spaces below a minimum square footage. The court rejected Dormant Commerce Clause challenge, holding the law neither discriminated against out-of-state commerce nor violated the Pike balancing test given California's strong interest in preventing animal cruelty. The case was later affirmed by the Supreme Court in National Pork Producers Council v. Ross.",
+    "metadata": {
+      "constitutional_claim": "Dormant Commerce Clause",
+      "statute": "Proposition 12",
+      "outcome": "statute upheld"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "nppc-v-ross-scotus-2023",
+    "doc_type": "case",
+    "jurisdiction": "US",
+    "court": "U.S. Supreme Court",
+    "decision_date": "2023-05-11",
+    "title": "National Pork Producers Council v. Ross",
+    "citation": "598 U.S. 356 (2023)",
+    "source_url": "https://www.animallaw.info/case/national-pork-producers-council-v-ross",
+    "full_text": "The Supreme Court upheld California's Proposition 12 in a plurality opinion. A majority of justices rejected the Dormant Commerce Clause challenge, though they split on reasoning. The plurality held that Proposition 12 did not discriminate against out-of-state commerce and that mere out-of-state economic effects are insufficient to trigger heightened scrutiny. The decision is a landmark victory for state animal-welfare legislation and limits the ability of industry groups to use the Dormant Commerce Clause to invalidate state laws regulating conditions of agricultural production.",
+    "metadata": {
+      "constitutional_claim": "Dormant Commerce Clause",
+      "statute": "Proposition 12",
+      "outcome": "statute upheld",
+      "frequently_cited": true
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "united-egg-v-humane-ca-2022",
+    "doc_type": "case",
+    "jurisdiction": "US-9th-Cir",
+    "court": "U.S. Court of Appeals for the Ninth Circuit",
+    "decision_date": "2022-11-04",
+    "title": "United Egg Producers v. Becerra",
+    "citation": "No. 21-16956 (9th Cir. 2022)",
+    "source_url": "https://www.animallaw.info/case/united-egg-producers-v-becerra",
+    "full_text": "The Ninth Circuit dismissed a pre-enforcement challenge to California's Proposition 12 egg provisions for lack of standing. Plaintiffs could not demonstrate a sufficiently imminent injury because they had not alleged specific plans to sell non-compliant eggs in California. The court's standing analysis focused on the concreteness and imminence requirements under Lujan. The case illustrates the difficulty industry groups face in bringing pre-enforcement challenges to state animal-welfare statutes before suffering direct economic harm.",
+    "metadata": {
+      "standing_type": "pre-enforcement",
+      "statute": "Proposition 12",
+      "outcome": "dismissed for lack of standing"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "united-states-v-stevens-2010",
+    "doc_type": "case",
+    "jurisdiction": "US",
+    "court": "U.S. Supreme Court",
+    "decision_date": "2010-04-20",
+    "title": "United States v. Stevens",
+    "citation": "559 U.S. 460 (2010)",
+    "source_url": "https://www.animallaw.info/case/united-states-v-stevens",
+    "full_text": "The Supreme Court struck down 18 U.S.C. § 48, a federal statute criminalizing depictions of animal cruelty, as a facially overbroad violation of the First Amendment. The Court rejected the government's argument that a categorical First Amendment exception should be created for depictions of animal cruelty. The decision required Congress to redraft the statute more narrowly. It has implications for advocacy organizations that document and publicize animal cruelty, as the Court's reasoning clarifies that such documentation is protected speech.",
+    "metadata": {
+      "constitutional_claim": "First Amendment",
+      "federal_statute": "18 U.S.C. § 48",
+      "outcome": "statute struck down"
+    }
+  },
+  {
+    "source": "animallaw.info",
+    "source_id": "animal-welfare-inst-v-martin-1st-cir-2009",
+    "doc_type": "case",
+    "jurisdiction": "US-1st-Cir",
+    "court": "U.S. Court of Appeals for the First Circuit",
+    "decision_date": "2009-06-05",
+    "title": "Animal Welfare Institute v. Martin",
+    "citation": "588 F. Supp. 2d 70 (D. Me. 2008), aff'd 623 F.3d 19 (1st Cir. 2010)",
+    "source_url": "https://www.animallaw.info/case/animal-welfare-institute-v-martin",
+    "full_text": "The First Circuit affirmed that the Animal Welfare Institute had organizational standing to challenge Maine trapping regulations that allegedly resulted in incidental trapping of Canada lynx, a threatened species. The court applied the Havens Realty resource-diversion test, finding that the organization had diverted staff resources to address the lynx trapping issue and this diversion was traceable to Maine's permitting of trapping methods that endangered lynx. The case is a strong organizational standing precedent in the First Circuit applying the Havens doctrine to wildlife contexts.",
+    "metadata": {
+      "standing_type": "organizational",
+      "statute": "Endangered Species Act",
+      "outcome": "standing affirmed"
+    }
+  }
+]
