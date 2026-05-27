@@ -1,0 +1,15 @@
+export const JURISDICTIONS = [
+  { value: 'US',          label: 'U.S. Supreme Court',               short: 'SCOTUS' },
+  { value: 'US-1st-Cir',  label: '1st Circuit — Boston',             short: '1st Cir.' },
+  { value: 'US-2nd-Cir',  label: '2nd Circuit — New York',           short: '2nd Cir.' },
+  { value: 'US-3rd-Cir',  label: '3rd Circuit — Philadelphia',       short: '3rd Cir.' },
+  { value: 'US-4th-Cir',  label: '4th Circuit — Richmond',           short: '4th Cir.' },
+  { value: 'US-5th-Cir',  label: '5th Circuit — New Orleans',        short: '5th Cir.' },
+  { value: 'US-6th-Cir',  label: '6th Circuit — Cincinnati',         short: '6th Cir.' },
+  { value: 'US-7th-Cir',  label: '7th Circuit — Chicago',            short: '7th Cir.' },
+  { value: 'US-8th-Cir',  label: '8th Circuit — St. Louis',          short: '8th Cir.' },
+  { value: 'US-9th-Cir',  label: '9th Circuit — San Francisco',      short: '9th Cir.' },
+  { value: 'US-10th-Cir', label: '10th Circuit — Denver',            short: '10th Cir.' },
+  { value: 'US-11th-Cir', label: '11th Circuit — Atlanta',           short: '11th Cir.' },
+  { value: 'US-DC-Cir',   label: 'D.C. Circuit — Washington D.C.',   short: 'D.C. Cir.' },
+]
