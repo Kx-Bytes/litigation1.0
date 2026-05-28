@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Copy, Check, Download, AlertTriangle, Scale,
   Lightbulb, AlertCircle, Trash2, Clock,
-  FileText, ShieldAlert, TrendingUp,
+  FileText, ShieldAlert, TrendingUp, BarChart2,
 } from 'lucide-react'
 import ConfidenceBadge    from './ConfidenceBadge'
 import RiskFactorCard     from './RiskFactorCard'
@@ -16,7 +16,20 @@ const ALL_TABS = [
   { id: 'risk',      label: 'Risk',      icon: ShieldAlert },
   { id: 'cases',     label: 'Cases',     icon: Scale       },
   { id: 'strategy',  label: 'Strategy',  icon: TrendingUp  },
+  { id: 'trends',    label: 'Trends',    icon: BarChart2   },
 ]
+
+/* ── Year parsing helper ─────────────────────────────────────────────────── */
+function extractYears(cases) {
+  const yearRe = /\b(1[89]\d{2}|20[0-2]\d)\b/g
+  const counts = {}
+  cases.forEach(c => {
+    const src = [c.citation, c.case_name, c.chunk_id].filter(Boolean).join(' ')
+    const hits = src.match(yearRe) || []
+    hits.forEach(y => { counts[y] = (counts[y] || 0) + 1 })
+  })
+  return counts
+}
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 export default function ResultsPanel({ result, query }) {
@@ -37,8 +50,19 @@ export default function ResultsPanel({ result, query }) {
     if (t.id === 'risk')     return !refused && riskFactors.length > 0
     if (t.id === 'cases')    return comparableCases.length > 0
     if (t.id === 'strategy') return strategic.length > 0 || uncertaintyNotes.length > 0 || droppedClaims.length > 0
+    if (t.id === 'trends')   return comparableCases.length > 0
     return true // always show overview
   })
+
+  /* Pre-compute trend data */
+  const yearCounts  = extractYears(comparableCases)
+  const sortedYears = Object.keys(yearCounts).sort()
+  const maxCount    = Math.max(...Object.values(yearCounts), 1)
+  const decadeMap   = sortedYears.reduce((acc, y) => {
+    const decade = `${Math.floor(parseInt(y, 10) / 10) * 10}s`
+    acc[decade]  = (acc[decade] || 0) + yearCounts[y]
+    return acc
+  }, {})
 
   function handleCopy() {
     navigator.clipboard.writeText(buildExportText(result, query)).then(() => {
@@ -290,6 +314,126 @@ export default function ResultsPanel({ result, query }) {
                   {comparableCases.map((c, i) => (
                     <ComparableCaseCard key={i} case={c} index={i} />
                   ))}
+                </div>
+              )}
+
+              {/* ── TRENDS ───────────────────────────────── */}
+              {activeTab === 'trends' && (
+                <div className="space-y-5">
+
+                  {/* Intro callout */}
+                  <div
+                    className="rounded-xl px-5 py-4 flex items-start gap-3"
+                    style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)' }}
+                  >
+                    <BarChart2 size={15} className="text-indigo-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Years extracted from comparable-case citations. Each bar represents the number of
+                      retrieved cases decided in that year — giving a rough sense of how the precedent
+                      landscape evolved over time.
+                    </p>
+                  </div>
+
+                  {sortedYears.length === 0 ? (
+                    <div className="text-center py-10 text-gray-600 text-sm">
+                      No dateable citations found in the comparable cases.
+                    </div>
+                  ) : (
+                    <>
+                      {/* Year-level bar chart */}
+                      <div
+                        className="rounded-2xl p-5"
+                        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+                      >
+                        <div className="text-xs font-bold uppercase tracking-widest text-indigo-400/70 flex items-center gap-1.5 mb-5">
+                          <BarChart2 size={11} />Cases by Year
+                        </div>
+                        <div className="space-y-2">
+                          {sortedYears.map((year, i) => {
+                            const pct = Math.round((yearCounts[year] / maxCount) * 100)
+                            return (
+                              <motion.div
+                                key={year}
+                                initial={{ opacity: 0, x: -12 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.04 }}
+                                className="flex items-center gap-3"
+                              >
+                                <span className="text-xs font-mono text-gray-500 w-10 text-right flex-shrink-0">
+                                  {year}
+                                </span>
+                                <div className="flex-1 h-5 rounded-md overflow-hidden"
+                                     style={{ background: 'rgba(255,255,255,0.04)' }}>
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${pct}%` }}
+                                    transition={{ duration: 0.5, delay: i * 0.04, ease: 'easeOut' }}
+                                    className="h-full rounded-md"
+                                    style={{
+                                      background: `linear-gradient(90deg, rgba(99,102,241,0.7), rgba(139,92,246,0.5))`,
+                                      minWidth: pct > 0 ? '8px' : 0,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-xs font-mono text-gray-500 w-4 flex-shrink-0">
+                                  {yearCounts[year]}
+                                </span>
+                              </motion.div>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Decade summary */}
+                      {Object.keys(decadeMap).length > 1 && (
+                        <div
+                          className="rounded-2xl p-5"
+                          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)' }}
+                        >
+                          <div className="text-xs font-bold uppercase tracking-widest text-violet-400/70 flex items-center gap-1.5 mb-4">
+                            <TrendingUp size={11} />Decade Breakdown
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            {Object.entries(decadeMap)
+                              .sort(([a], [b]) => a.localeCompare(b))
+                              .map(([decade, count]) => (
+                                <div
+                                  key={decade}
+                                  className="rounded-xl px-4 py-3 text-center"
+                                  style={{
+                                    background: 'rgba(139,92,246,0.07)',
+                                    border: '1px solid rgba(139,92,246,0.18)',
+                                  }}
+                                >
+                                  <div className="text-lg font-bold font-mono text-violet-300">{count}</div>
+                                  <div className="text-xs text-gray-500 mt-0.5">{decade}</div>
+                                </div>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Span callout */}
+                      {sortedYears.length >= 2 && (
+                        <div className="flex gap-4 text-center">
+                          {[
+                            { label: 'Earliest', value: sortedYears[0] },
+                            { label: 'Latest',   value: sortedYears[sortedYears.length - 1] },
+                            { label: 'Span',     value: `${parseInt(sortedYears[sortedYears.length - 1], 10) - parseInt(sortedYears[0], 10)} yrs` },
+                          ].map(({ label, value }) => (
+                            <div
+                              key={label}
+                              className="flex-1 rounded-xl py-3"
+                              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                            >
+                              <div className="text-base font-bold font-mono text-white">{value}</div>
+                              <div className="text-xs text-gray-600 mt-0.5">{label}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
 
