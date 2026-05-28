@@ -18,7 +18,7 @@ needed. The court name is still parsed and mapped to a jurisdiction code
 Idempotent
 ----------
 The scraper does not touch the DB. It returns ScrapedDoc dataclasses.
-Callers should check (source="animallaw", source_id=<slug>) before inserting.
+Callers should check (source="animallaw", source_id=<slug>) before 
 """
 
 from __future__ import annotations

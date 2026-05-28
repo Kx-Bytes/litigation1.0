@@ -90,7 +90,13 @@ export default function HomePage() {
     <div className="min-h-screen relative overflow-x-hidden">
 
       {/* ── Particle canvas ─────────────────────────────────────────────── */}
-      <ParticleNetwork opacity={0.55} />
+      <ParticleNetwork opacity={0.45} />
+
+      {/* ── Aurora spinning blob (hero area only) ───────────────────────── */}
+      <div aria-hidden="true" className="fixed pointer-events-none overflow-hidden"
+           style={{ top: '-20%', left: '20%', width: '60%', height: '60%', zIndex: 0 }}>
+        <div className="aurora" style={{ borderRadius: '50%', opacity: 0.18 }} />
+      </div>
 
       {/* ── Drifting aurora orbs ────────────────────────────────────────── */}
       <div aria-hidden="true" className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
@@ -190,11 +196,30 @@ export default function HomePage() {
             ))}
           </motion.div>
 
+          {/* Tech-stack chips */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.95 }}
+            className="mt-8 flex flex-wrap items-center justify-center gap-2"
+          >
+            {[
+              { label: 'pgvector',        color: 'chip-indigo' },
+              { label: 'voyage-3-large',  color: 'chip-indigo' },
+              { label: 'HNSW index',      color: 'chip-indigo' },
+              { label: 'FastAPI',         color: '' },
+              { label: 'React',           color: '' },
+              { label: '3-layer verify',  color: 'chip-emerald' },
+            ].map(({ label, color }) => (
+              <span key={label} className={`chip ${color}`}>{label}</span>
+            ))}
+          </motion.div>
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.0 }}
-            className="mt-5 text-xs text-gray-700 flex items-center justify-center gap-1.5"
+            transition={{ delay: 1.05 }}
+            className="mt-6 text-xs text-gray-700 flex items-center justify-center gap-1.5"
           >
             <AlertTriangle size={11} />
             Informational risk assessment only — not legal advice. Always consult qualified counsel.

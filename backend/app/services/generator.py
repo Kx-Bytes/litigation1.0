@@ -1,25 +1,25 @@
 """
 B3 — Generator.
 
-Takes retrieved chunks + the user query and calls Claude Sonnet 4.6 under
-a strict cite-or-refuse contract enforced by tool use.
+Takes retrieved chunks + the user query and calls a Claude model via
+OpenRouter under a strict cite-or-refuse contract enforced by function calling.
 
 Cite-or-refuse contract
 -----------------------
-Claude is given two tools:
+Claude is given two functions:
   submit_risk_assessment — requires every citation to be a chunk_id drawn from
     the retrieved set. The JSON schema enumerates valid chunk_ids at call time,
     so Claude CANNOT reference a chunk that wasn't retrieved.
   refuse_query — used when Claude (or the pre-call check) determines the corpus
     is too thin to answer reliably.
 
-tool_choice="any" forces Claude to call exactly one of the two tools — it
-cannot respond in free text and sneak in an unverified citation.
+tool_choice="required" forces Claude to call exactly one of the two functions —
+it cannot respond in free text and sneak in an unverified citation.
 
 Refusal thresholds (pre-call, no LLM cost)
 -------------------------------------------
   REFUSE_THRESHOLD    = 2   — refuse immediately if fewer than 2 chunks score
-                              >= MIN_SIMILARITY. No Claude call made.
+                              >= MIN_SIMILARITY. No LLM call made.
   UNCERTAIN_THRESHOLD = 4   — if 2–3 chunks score >= MIN_SIMILARITY, call Claude
                               but inject a thin-corpus warning into the prompt and
                               append an automatic uncertainty note to the output.
@@ -27,10 +27,11 @@ Refusal thresholds (pre-call, no LLM cost)
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 
 import structlog
-from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 
 from app.core.config import settings
 from app.services.retriever import RetrievedChunk
@@ -43,7 +44,8 @@ MIN_SIMILARITY      = 0.65   # cosine similarity floor for "on-point" chunk
 REFUSE_THRESHOLD    = 2      # refuse if fewer than this many chunks meet MIN_SIMILARITY
 UNCERTAIN_THRESHOLD = 4      # add uncertainty warning if fewer than this many chunks meet it
 
-MODEL = "claude-sonnet-4-6"
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
 
 # ── Output data model ─────────────────────────────────────────────────────────
 
@@ -84,165 +86,172 @@ class GeneratorOutput:
     confidence_band: str = "low"   # "high" | "medium" | "low" | "refused"
 
     raw_model_output: str = ""
-    model: str = MODEL
+    model: str = ""
 
 
 # ── Tool schema builder ───────────────────────────────────────────────────────
 
 def _build_tools(valid_chunk_ids: list[str]) -> list[dict]:
     """
-    Build the two tool schemas with valid_chunk_ids baked into the enum
-    constraints. Called at query time so the enumeration is always current.
+    Build the two OpenAI-format function schemas with valid_chunk_ids baked
+    into the enum constraints. Called at query time so the enumeration is
+    always current.
     """
     return [
         {
-            "name": "submit_risk_assessment",
-            "description": (
-                "Submit a structured litigation risk assessment grounded exclusively "
-                "in the retrieved case excerpts. Every chunk_id you reference MUST "
-                "appear in the provided valid_chunk_ids — do not invent or recall "
-                "any case not in that list."
-            ),
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "risk_summary": {
-                        "type": "string",
-                        "description": (
-                            "Plain-language 2–4 sentence overview of overall litigation "
-                            "risk, grounded in the retrieved cases."
-                        ),
-                    },
-                    "risk_factors": {
-                        "type": "array",
-                        "description": (
-                            "Individual risk factors. Each must be grounded in at least "
-                            "one retrieved chunk."
-                        ),
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "label": {
-                                    "type": "string",
-                                    "description": "Short factor name (e.g. 'Standing — injury-in-fact').",
+            "type": "function",
+            "function": {
+                "name": "submit_risk_assessment",
+                "description": (
+                    "Submit a structured litigation risk assessment grounded exclusively "
+                    "in the retrieved case excerpts. Every chunk_id you reference MUST "
+                    "appear in the provided valid_chunk_ids — do not invent or recall "
+                    "any case not in that list."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "risk_summary": {
+                            "type": "string",
+                            "description": (
+                                "Plain-language 2–4 sentence overview of overall litigation "
+                                "risk, grounded in the retrieved cases."
+                            ),
+                        },
+                        "risk_factors": {
+                            "type": "array",
+                            "description": (
+                                "Individual risk factors. Each must be grounded in at least "
+                                "one retrieved chunk."
+                            ),
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "label": {
+                                        "type": "string",
+                                        "description": "Short factor name (e.g. 'Standing — injury-in-fact').",
+                                    },
+                                    "weight": {
+                                        "type": "string",
+                                        "enum": ["high", "medium", "low"],
+                                        "description": "Severity of this risk factor.",
+                                    },
+                                    "discussion": {
+                                        "type": "string",
+                                        "description": (
+                                            "1–3 sentence explanation drawn from the retrieved "
+                                            "cases. Do not assert facts not in the excerpts."
+                                        ),
+                                    },
+                                    "chunk_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": valid_chunk_ids,
+                                        },
+                                        "description": (
+                                            "IDs of the retrieved chunks that support this "
+                                            "factor. Must be non-empty."
+                                        ),
+                                        "minItems": 1,
+                                    },
                                 },
-                                "weight": {
-                                    "type": "string",
-                                    "enum": ["high", "medium", "low"],
-                                    "description": "Severity of this risk factor.",
-                                },
-                                "discussion": {
-                                    "type": "string",
-                                    "description": (
-                                        "1–3 sentence explanation drawn from the retrieved "
-                                        "cases. Do not assert facts not in the excerpts."
-                                    ),
-                                },
-                                "chunk_ids": {
-                                    "type": "array",
-                                    "items": {
+                                "required": ["label", "weight", "discussion", "chunk_ids"],
+                            },
+                        },
+                        "comparable_cases": {
+                            "type": "array",
+                            "description": "Up to 5 most directly comparable cases from the retrieved chunks.",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "chunk_id": {
                                         "type": "string",
                                         "enum": valid_chunk_ids,
+                                        "description": "ID of the retrieved chunk for this case.",
                                     },
-                                    "description": (
-                                        "IDs of the retrieved chunks that support this "
-                                        "factor. Must be non-empty."
-                                    ),
-                                    "minItems": 1,
+                                    "summary": {
+                                        "type": "string",
+                                        "description": "1–2 sentence summary of the case and its outcome.",
+                                    },
+                                    "relevance": {
+                                        "type": "string",
+                                        "description": "One sentence: why this case is directly relevant to the query.",
+                                    },
                                 },
+                                "required": ["chunk_id", "summary", "relevance"],
                             },
-                            "required": ["label", "weight", "discussion", "chunk_ids"],
+                            "maxItems": 5,
+                        },
+                        "strategic_considerations": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": (
+                                "2–4 actionable observations for litigation counsel "
+                                "(e.g. venue selection, framing, timing). Each grounded "
+                                "in the retrieved precedent."
+                            ),
+                        },
+                        "uncertainty_notes": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": (
+                                "Honest caveats the user should know: corpus gaps, thin "
+                                "precedent, unsettled doctrine, jurisdictional limits of "
+                                "the retrieved cases."
+                            ),
+                        },
+                        "confidence_band": {
+                            "type": "string",
+                            "enum": ["high", "medium", "low"],
+                            "description": (
+                                "Overall assessment confidence. "
+                                "high = 4+ strong on-point precedents; "
+                                "medium = 2–3 relevant cases with some indirection; "
+                                "low = thin or only tangentially relevant precedent."
+                            ),
                         },
                     },
-                    "comparable_cases": {
-                        "type": "array",
-                        "description": "Up to 5 most directly comparable cases from the retrieved chunks.",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "chunk_id": {
-                                    "type": "string",
-                                    "enum": valid_chunk_ids,
-                                    "description": "ID of the retrieved chunk for this case.",
-                                },
-                                "summary": {
-                                    "type": "string",
-                                    "description": "1–2 sentence summary of the case and its outcome.",
-                                },
-                                "relevance": {
-                                    "type": "string",
-                                    "description": "One sentence: why this case is directly relevant to the query.",
-                                },
-                            },
-                            "required": ["chunk_id", "summary", "relevance"],
-                        },
-                        "maxItems": 5,
-                    },
-                    "strategic_considerations": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": (
-                            "2–4 actionable observations for litigation counsel "
-                            "(e.g. venue selection, framing, timing). Each grounded "
-                            "in the retrieved precedent."
-                        ),
-                    },
-                    "uncertainty_notes": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": (
-                            "Honest caveats the user should know: corpus gaps, thin "
-                            "precedent, unsettled doctrine, jurisdictional limits of "
-                            "the retrieved cases."
-                        ),
-                    },
-                    "confidence_band": {
-                        "type": "string",
-                        "enum": ["high", "medium", "low"],
-                        "description": (
-                            "Overall assessment confidence. "
-                            "high = 4+ strong on-point precedents; "
-                            "medium = 2–3 relevant cases with some indirection; "
-                            "low = thin or only tangentially relevant precedent."
-                        ),
-                    },
+                    "required": [
+                        "risk_summary",
+                        "risk_factors",
+                        "comparable_cases",
+                        "strategic_considerations",
+                        "uncertainty_notes",
+                        "confidence_band",
+                    ],
                 },
-                "required": [
-                    "risk_summary",
-                    "risk_factors",
-                    "comparable_cases",
-                    "strategic_considerations",
-                    "uncertainty_notes",
-                    "confidence_band",
-                ],
             },
         },
         {
-            "name": "refuse_query",
-            "description": (
-                "Refuse to produce an assessment if the retrieved corpus is too thin, "
-                "too indirect, or otherwise insufficient for a reliable answer. "
-                "Use this instead of guessing or hallucinating cases."
-            ),
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "reason": {
-                        "type": "string",
-                        "description": (
-                            "Plain-language explanation of why the query cannot be "
-                            "answered reliably from the retrieved corpus."
-                        ),
+            "type": "function",
+            "function": {
+                "name": "refuse_query",
+                "description": (
+                    "Refuse to produce an assessment if the retrieved corpus is too thin, "
+                    "too indirect, or otherwise insufficient for a reliable answer. "
+                    "Use this instead of guessing or hallucinating cases."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "reason": {
+                            "type": "string",
+                            "description": (
+                                "Plain-language explanation of why the query cannot be "
+                                "answered reliably from the retrieved corpus."
+                            ),
+                        },
+                        "suggestion": {
+                            "type": "string",
+                            "description": (
+                                "Optional: what the user could try instead — e.g. broaden "
+                                "jurisdiction, rephrase the claim, enable CourtListener."
+                            ),
+                        },
                     },
-                    "suggestion": {
-                        "type": "string",
-                        "description": (
-                            "Optional: what the user could try instead — e.g. broaden "
-                            "jurisdiction, rephrase the claim, enable CourtListener."
-                        ),
-                    },
+                    "required": ["reason"],
                 },
-                "required": ["reason"],
             },
         },
     ]
@@ -259,10 +268,6 @@ def _build_prompt(
 ) -> str:
     """
     Build the user-turn message with retrieved chunks embedded.
-
-    Each chunk is labelled with its chunk_id, citation, jurisdiction,
-    section type, and similarity score so Claude can reason about relevance.
-    thin_corpus=True injects a visible warning and forces uncertainty_notes.
     """
     corpus_parts: list[str] = []
     for chunk in chunks:
@@ -347,16 +352,19 @@ def _pre_call_refusal(chunks: list[RetrievedChunk]) -> GeneratorOutput | None:
     return None
 
 
-# ── Anthropic client (module-level, lazy) ─────────────────────────────────────
+# ── OpenAI client (module-level, lazy) ───────────────────────────────────────
 
-_anthropic_client: AsyncAnthropic | None = None
+_openai_client: AsyncOpenAI | None = None
 
 
-def _get_client() -> AsyncAnthropic:
-    global _anthropic_client
-    if _anthropic_client is None:
-        _anthropic_client = AsyncAnthropic(api_key=settings.anthropic_api_key)
-    return _anthropic_client
+def _get_client() -> AsyncOpenAI:
+    global _openai_client
+    if _openai_client is None:
+        _openai_client = AsyncOpenAI(
+            api_key=settings.openrouter_api_key,
+            base_url=OPENROUTER_BASE_URL,
+        )
+    return _openai_client
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────
@@ -372,64 +380,68 @@ async def generate(
 
     Pipeline:
       1. Pre-call refusal check (avoids LLM cost on thin corpus).
-      2. Build tool schemas with chunk_ids locked to retrieved set.
+      2. Build function schemas with chunk_ids locked to retrieved set.
       3. Build prompt with embedded chunk context.
-      4. Call Claude Sonnet 4.6 with tool_choice="any".
-      5. Parse the tool call result into GeneratorOutput.
+      4. Call model via OpenRouter with tool_choice="required".
+      5. Parse the function call result into GeneratorOutput.
     """
+    model = settings.openrouter_model
 
     # ── 1. Pre-call refusal ───────────────────────────────────────────────────
     early_refusal = _pre_call_refusal(chunks)
     if early_refusal:
+        early_refusal.model = model
         return early_refusal
 
     above = _count_above_threshold(chunks)
     thin_corpus = above < UNCERTAIN_THRESHOLD
 
     valid_chunk_ids = [c.chunk_id for c in chunks]
-    tools   = _build_tools(valid_chunk_ids)
-    prompt  = _build_prompt(jurisdiction, claim, facts, chunks, thin_corpus)
+    tools  = _build_tools(valid_chunk_ids)
+    prompt = _build_prompt(jurisdiction, claim, facts, chunks, thin_corpus)
 
     log.info(
         "generator_call_start",
-        model=MODEL,
+        model=model,
         total_chunks=len(chunks),
         above_threshold=above,
         thin_corpus=thin_corpus,
     )
 
-    # ── 2. Call Claude ────────────────────────────────────────────────────────
+    # ── 2. Call model via OpenRouter ──────────────────────────────────────────
     client = _get_client()
-    response = await client.messages.create(
-        model=MODEL,
+    response = await client.chat.completions.create(
+        model=model,
         max_tokens=4096,
         tools=tools,
-        tool_choice={"type": "any"},   # must call one of the two tools
+        tool_choice="required",   # must call one of the two functions
         messages=[{"role": "user", "content": prompt}],
     )
 
-    raw_output = str(response.content)
+    message = response.choices[0].message
+    raw_output = str(message)
 
-    # ── 3. Extract tool use block ─────────────────────────────────────────────
-    tool_block = next(
-        (b for b in response.content if b.type == "tool_use"),
-        None,
+    # ── 3. Extract function call ──────────────────────────────────────────────
+    tool_call = (
+        message.tool_calls[0]
+        if message.tool_calls
+        else None
     )
 
-    if tool_block is None:
-        # Defensive: should never happen with tool_choice="any"
-        log.error("generator_no_tool_call", raw=raw_output[:300])
+    if tool_call is None:
+        log.error("generator_no_function_call", raw=raw_output[:300])
         return GeneratorOutput(
             refused=True,
-            refusal_reason="Generator did not return a structured tool response.",
+            refusal_reason="Generator did not return a structured function response.",
             confidence_band="refused",
             raw_model_output=raw_output,
+            model=model,
         )
 
-    tool_name  = tool_block.name
-    tool_input = tool_block.input  # already a dict
+    tool_name  = tool_call.function.name
+    tool_input = json.loads(tool_call.function.arguments)
 
-    log.info("generator_tool_called", tool=tool_name)
+    log.info("generator_function_called", function=tool_name)
 
     # ── 4. Refusal path ───────────────────────────────────────────────────────
     if tool_name == "refuse_query":
@@ -439,6 +451,7 @@ async def generate(
             refusal_suggestion=tool_input.get("suggestion"),
             confidence_band="refused",
             raw_model_output=raw_output,
+            model=model,
         )
 
     # ── 5. Assessment path ────────────────────────────────────────────────────
@@ -461,7 +474,6 @@ async def generate(
         for c in tool_input.get("comparable_cases", [])
     ]
 
-    # Prepend an automatic thin-corpus note if warranted
     auto_notes: list[str] = []
     if thin_corpus:
         auto_notes.append(
@@ -488,5 +500,5 @@ async def generate(
         uncertainty_notes=uncertainty_notes,
         confidence_band=tool_input.get("confidence_band", "low"),
         raw_model_output=raw_output,
-        model=MODEL,
+        model=model,
     )

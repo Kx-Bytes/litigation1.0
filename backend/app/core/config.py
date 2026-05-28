@@ -9,8 +9,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "postgresql+asyncpg://litigator:litigator@localhost:5432/litigation"
 
-    # Anthropic
-    anthropic_api_key: str = ""
+    # OpenRouter
+    openrouter_api_key: str = ""
+    openrouter_model: str = "anthropic/claude-3.5-sonnet"
 
     # Voyage AI
     voyage_api_key: str = ""

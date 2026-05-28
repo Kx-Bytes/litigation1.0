@@ -8,10 +8,10 @@ import { submitQuery } from '../lib/api'
 import { useQueryHistory } from '../hooks/useQueryHistory'
 
 export default function AnalyzePage() {
-  const [loading, setLoading]     = useState(false)
-  const [result, setResult]       = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
   const [lastQuery, setLastQuery] = useState(null)
-  const [error, setError]         = useState(null)
+  const [error, setError] = useState(null)
 
   const { addEntry } = useQueryHistory()
 
@@ -46,9 +46,13 @@ export default function AnalyzePage() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-10"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-4">
-            <Sparkles size={11} />
-            RAG-Grounded Assessment
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span className="chip chip-indigo">
+              <Sparkles size={11} />
+              RAG-Grounded Assessment
+            </span>
+            <span className="chip chip-emerald">Cite-or-Refuse</span>
+            <span className="chip">3-layer verified</span>
           </div>
           <h1 className="font-display text-3xl md:text-4xl font-bold text-white mb-2">
             Litigation Risk Analysis

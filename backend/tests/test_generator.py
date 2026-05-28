@@ -112,17 +112,18 @@ def test_pre_call_refusal_empty_list() -> None:
 def test_build_tools_returns_two_tools() -> None:
     tools = _build_tools(["chunk-1", "chunk-2"])
     assert len(tools) == 2
-    names = {t["name"] for t in tools}
+    # OpenAI format: tool["function"]["name"]
+    names = {t["function"]["name"] for t in tools}
     assert names == {"submit_risk_assessment", "refuse_query"}
 
 
 def test_build_tools_chunk_ids_in_enum() -> None:
     valid_ids = ["chunk-abc", "chunk-def"]
     tools = _build_tools(valid_ids)
-    assessment_tool = next(t for t in tools if t["name"] == "submit_risk_assessment")
-    schema = assessment_tool["input_schema"]
+    assessment_tool = next(t for t in tools if t["function"]["name"] == "submit_risk_assessment")
+    # OpenAI format: tool["function"]["parameters"] (not "input_schema")
+    schema = assessment_tool["function"]["parameters"]
 
-    # chunk_ids items should enumerate exactly the provided ids
     chunk_ids_schema = schema["properties"]["risk_factors"]["items"]["properties"]["chunk_ids"]["items"]
     assert chunk_ids_schema["enum"] == valid_ids
 
@@ -130,22 +131,22 @@ def test_build_tools_chunk_ids_in_enum() -> None:
 def test_build_tools_comparable_cases_chunk_id_enum() -> None:
     valid_ids = ["x1", "x2", "x3"]
     tools = _build_tools(valid_ids)
-    assessment_tool = next(t for t in tools if t["name"] == "submit_risk_assessment")
-    schema = assessment_tool["input_schema"]
+    assessment_tool = next(t for t in tools if t["function"]["name"] == "submit_risk_assessment")
+    schema = assessment_tool["function"]["parameters"]
     cc_chunk_id = schema["properties"]["comparable_cases"]["items"]["properties"]["chunk_id"]
     assert cc_chunk_id["enum"] == valid_ids
 
 
 def test_build_tools_refuse_has_reason_required() -> None:
     tools = _build_tools(["c1"])
-    refuse_tool = next(t for t in tools if t["name"] == "refuse_query")
-    assert "reason" in refuse_tool["input_schema"]["required"]
+    refuse_tool = next(t for t in tools if t["function"]["name"] == "refuse_query")
+    assert "reason" in refuse_tool["function"]["parameters"]["required"]
 
 
 def test_build_tools_assessment_required_fields() -> None:
     tools = _build_tools(["c1"])
-    at = next(t for t in tools if t["name"] == "submit_risk_assessment")
-    required = set(at["input_schema"]["required"])
+    at = next(t for t in tools if t["function"]["name"] == "submit_risk_assessment")
+    required = set(at["function"]["parameters"]["required"])
     assert required == {
         "risk_summary",
         "risk_factors",
@@ -158,8 +159,8 @@ def test_build_tools_assessment_required_fields() -> None:
 
 def test_build_tools_confidence_band_enum() -> None:
     tools = _build_tools(["c1"])
-    at = next(t for t in tools if t["name"] == "submit_risk_assessment")
-    cb = at["input_schema"]["properties"]["confidence_band"]
+    at = next(t for t in tools if t["function"]["name"] == "submit_risk_assessment")
+    cb = at["function"]["parameters"]["properties"]["confidence_band"]
     assert set(cb["enum"]) == {"high", "medium", "low"}
 
 
@@ -211,7 +212,7 @@ def test_generator_output_defaults() -> None:
     assert out.comparable_cases == []
     assert out.uncertainty_notes == []
     assert out.strategic_considerations == []
-    assert out.model == "claude-sonnet-4-6"
+    assert out.model == ""   # model is set at call time, not in the dataclass default
 
 
 def test_generator_output_refusal_fields() -> None:
