@@ -121,7 +121,7 @@ function HistoryEntry({ entry, onRemove }) {
                     {result.risk_assessment.factors.slice(0, 3).map((f, i) => (
                       <div key={i} className="text-xs text-gray-400 bg-white/4 rounded-lg px-3 py-2 border border-white/6">
                         <span className="text-amber-400 mr-1.5">•</span>
-                        {f.factor_text || f.factor}
+                        {f.label}{f.discussion ? ` — ${f.discussion.slice(0, 120)}${f.discussion.length > 120 ? '…' : ''}` : ''}
                       </div>
                     ))}
                     {factorCount > 3 && (
