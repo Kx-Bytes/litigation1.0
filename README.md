@@ -1,39 +1,191 @@
-# Litigation Prediction and Strategy
+# Litigation Prediction & Strategy
 
-Open Paws RDP — open-source AI platform to help animal-advocacy legal teams in the USA assess litigation risk, research precedent, and evaluate strategic options.
+**Open Paws RDP — open-source AI platform for animal-advocacy litigation strategy (USA)**
 
-> Outputs are framed as informational risk assessments and scenario analysis. Not legal advice.
+Helps nonprofit legal teams assess litigation risk, surface relevant federal precedent, and evaluate strategic options — grounded in verified case law, never hallucinated.
 
-## Workflow
+> **Disclaimer:** Outputs are informational risk assessments only. Not legal advice. All assessments are grounded in retrieved federal case law and every citation is verified before display.
 
-Following the Open Paws Week 1 & Week 2 intern workflow:
+---
 
-- **Stage 1 — Discovery & Problem Framing** (Days 1–2) — *in progress*
-- **Stage 2 — Design & Architecture** (Days 3–4)
-- **Stage 3 — Development** (Days 5–11)
-- **Stage 4 — Review, Feedback & Bug Fixing** (Days 12–14)
+## What it does
 
-## Current status
+1. You describe a legal claim and supporting facts.
+2. The pipeline embeds your query (Voyage AI), retrieves the closest federal precedent from the case database (pgvector HNSW), generates a structured risk assessment (Claude Sonnet with cite-or-refuse tool use), verifies every cited chunk against the database, and computes a calibrated confidence band.
+3. You get a structured output: risk factors with citations, comparable cases, strategic considerations, uncertainty notes, and a `high / medium / low / refused` confidence band.
 
-| Day | Stage | Status | Deliverable |
-|-----|-------|--------|-------------|
-| 1 | Discovery | Done | [day1-absorb-brief.md](docs/stage1-discovery/day1-absorb-brief.md) |
-| 2 | Discovery | Done | [day2-solution-space.md](docs/stage1-discovery/day2-solution-space.md) + [project-discovery-note.md](docs/stage1-discovery/project-discovery-note.md) (Stage 1 gate doc — awaiting mentor sign-off) |
-| 3 | Design | Done | [day3-system-design.md](docs/stage2-design/day3-system-design.md) |
-| 4 | Design | Pending | Flow design + task breakdown → Design Doc |
-| 5–11 | Development | Pending | Runnable project |
-| 12–14 | Review | Pending | Final demo + handoff |
+Corpus scope: **federal cases only** — Supreme Court and circuit courts.
 
-## Repo layout
+---
+
+## Project structure
 
 ```
 litigation1.0/
-├── README.md                       # this file
+├── backend/                    # FastAPI + Python pipeline
+│   ├── app/
+│   │   ├── api/v1/endpoints/   # query, ingest, health
+│   │   ├── services/           # retriever, generator, verifier, confidence,
+│   │   │                       # scraper, parser, chunker, embedder, ingest
+│   │   ├── models/             # SQLAlchemy ORM models
+│   │   └── db/                 # session, migrations
+│   ├── alembic/                # DB migrations (0001–0003)
+│   └── tests/                  # 158 tests, 0 failing
+├── frontend/                   # React + Vite SPA
+│   └── src/
+│       ├── components/         # AnalyzePage, HistoryPage, HomePage, ...
+│       ├── hooks/              # useQueryHistory
+│       └── lib/                # api.js (axios), jurisdictions.js
+├── data/seed/cases.json        # 16 federal seed cases
 ├── docs/
-│   └── stage1-discovery/
-│       └── day1-absorb-brief.md    # Day 1 output
-└── logs/
-    └── daily-log.md                # standup + EOD notes
+│   ├── stage1-discovery/       # Project Discovery Note (mentor sign-off ✓)
+│   ├── stage2-design/          # Design Doc (mentor sign-off ✓)
+│   └── stage3-development/     # Dev log, self-audit
+├── docker-compose.yml
+└── .env                        # local secrets — never committed
 ```
 
-Code will land under `src/` once Stage 3 begins. We do not write production code before Stage 2 sign-off.
+---
+
+## Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker + Docker Compose v2)
+- API keys for **Voyage AI** and **Anthropic / OpenRouter** (see Environment variables below)
+
+---
+
+## Quickstart (Docker — recommended)
+
+```bash
+# 1. Clone and enter the repo
+git clone <repo-url>
+cd litigation1.0
+
+# 2. Fill in your API keys in .env (file already exists — edit it directly)
+#    Required: VOYAGE_API_KEY, OPENROUTER_API_KEY
+
+# 3. Start everything
+docker compose up --build
+
+# 4. Open the app
+open http://localhost:5173
+
+# API docs (FastAPI Swagger UI)
+open http://localhost:8000/docs
+```
+
+The `db` service initialises automatically. On first boot the backend applies all Alembic migrations and the app is ready once the health check at `GET /api/v1/health` returns `{"status": "ok"}`.
+
+---
+
+## Running the backend locally (without Docker)
+
+```bash
+cd backend
+
+# Install dependencies (requires Python 3.12+ and uv)
+pip install uv
+uv pip install --system .
+
+# Start a local Postgres with pgvector (or point DATABASE_URL at an existing instance)
+# Then run migrations
+alembic upgrade head
+
+# Start the API
+uvicorn app.main:app --reload --port 8000
+```
+
+---
+
+## Running the frontend locally
+
+```bash
+cd frontend
+npm install --legacy-peer-deps
+npm run dev
+# → http://localhost:5173 (Vite proxy forwards /api to localhost:8000)
+```
+
+---
+
+## Running tests
+
+```bash
+cd backend
+pytest                        # all 158 tests
+pytest tests/test_query.py    # a specific module
+pytest -v --tb=short          # verbose output
+```
+
+Tests mock all external services (Voyage AI, Anthropic). No live API calls or database required.
+
+---
+
+## Environment variables
+
+Edit the `.env` file in the repo root and fill in:
+
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string (asyncpg driver) |
+| `POSTGRES_USER` | DB user (used by Docker Compose) |
+| `POSTGRES_PASSWORD` | DB password |
+| `POSTGRES_DB` | DB name |
+| `VOYAGE_API_KEY` | Voyage AI API key (embeddings) |
+| `OPENROUTER_API_KEY` | OpenRouter API key (Claude Sonnet) |
+| `OPENROUTER_MODEL` | Model string, e.g. `anthropic/claude-sonnet-4-6` |
+| `ENVIRONMENT` | `development` or `production` |
+| `LOG_LEVEL` | `INFO`, `DEBUG`, etc. |
+
+---
+
+## Key API endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/health` | Health check |
+| `POST` | `/api/v1/query` | Submit a litigation query (full pipeline) |
+| `POST` | `/api/v1/ingest` | Trigger scrape + ingest pipeline (admin) |
+
+Full interactive docs at `http://localhost:8000/docs` when the backend is running.
+
+---
+
+## Architecture overview
+
+```
+User query
+    │
+    ▼
+[Embedder]  voyage-3-large → 1024-dim vector
+    │
+    ▼
+[Retriever]  pgvector HNSW, jurisdiction-aware, optional date range
+    │         < 2 strong chunks → pre-call refusal (no LLM call)
+    ▼
+[Generator]  Claude Sonnet 4.6, cite-or-refuse tool_use
+    │         chunk_ids enum-locked to retrieved set
+    ▼
+[Verifier]   2-level check: in-memory set + DB round-trip
+    │         drops unverified citations, prunes empty risk factors
+    ▼
+[Confidence] 3-signal pipeline band: strong_chunks, jurisdiction_match_rate,
+    │         verification_rate → high / medium / low / refused
+    ▼
+[Response]   QueryResponse + persisted QueryResult audit row
+```
+
+---
+
+## Documentation
+
+- [Project Discovery Note](docs/stage1-discovery/project-discovery-note.md) — problem framing and scope
+- [Design Doc](docs/stage2-design/design-doc.md) — architecture, data model, API design
+- [Dev Log](docs/stage3-development/dev-log.md) — what was built and why
+- [Self-Audit](docs/stage3-development/self-audit.md) — known issues and limitations
+
+---
+
+## Licence
+
+Open source. Intended for research and nonprofit legal strategy use only.

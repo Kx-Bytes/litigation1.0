@@ -64,6 +64,7 @@ class QueryRequest(BaseModel):
     jurisdiction: str
     claim: str
     facts: str
+    procedural_posture: str | None = None   # e.g. "Motion to Dismiss", "Summary Judgment"
     options: QueryOptions = QueryOptions()
 
 
@@ -145,7 +146,13 @@ async def submit_query(
     )
 
     # ── 2. Embed ──────────────────────────────────────────────────────────────
-    query_text = f"{body.claim}\n\n{body.facts}"
+    # Strip any legacy "Procedural Posture: …\n\n" prefix the frontend may have
+    # prepended to facts (older behaviour), since posture is now a proper field.
+    clean_facts = body.facts
+    if body.procedural_posture and clean_facts.startswith(f"Procedural Posture: {body.procedural_posture}"):
+        clean_facts = clean_facts[len(f"Procedural Posture: {body.procedural_posture}"):].lstrip("\n")
+
+    query_text = f"{body.claim}\n\n{clean_facts}"
     query_embedding = await embed_query(query_text)
 
     # ── 3. Retrieve ───────────────────────────────────────────────────────────
@@ -164,7 +171,8 @@ async def submit_query(
     generator_output = await generate(
         jurisdiction=body.jurisdiction,
         claim=body.claim,
-        facts=body.facts,
+        facts=clean_facts,
+        procedural_posture=body.procedural_posture,
         chunks=retrieved_chunks,
     )
 

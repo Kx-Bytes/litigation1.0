@@ -265,6 +265,7 @@ def _build_prompt(
     facts: str,
     chunks: list[RetrievedChunk],
     thin_corpus: bool,
+    procedural_posture: str | None = None,
 ) -> str:
     """
     Build the user-turn message with retrieved chunks embedded.
@@ -294,6 +295,18 @@ def _build_prompt(
         else ""
     )
 
+    # Procedural posture line — only included when provided. It shapes which
+    # legal standard applies (e.g. plausibility at MTD vs. no-genuine-dispute at SJ)
+    # and should drive the framing of risk factors and strategic considerations.
+    posture_line = (
+        f"Procedural posture: {procedural_posture}\n"
+        f"  (Tailor the risk analysis and strategic considerations to the legal standard "
+        f"that applies at this stage — e.g. plausibility for MTD, no-genuine-dispute for "
+        f"summary judgment, likelihood-of-success for preliminary injunction.)\n"
+        if procedural_posture
+        else ""
+    )
+
     return (
         "You are a legal research assistant helping litigation counsel assess strategic risk.\n"
         "You are NOT providing legal advice. You are producing an informational risk "
@@ -305,6 +318,7 @@ def _build_prompt(
         "## Query\n\n"
         f"Jurisdiction: {jurisdiction}\n"
         f"Legal claim:  {claim}\n"
+        f"{posture_line}"
         f"Facts:        {facts}\n\n"
         "## Retrieved case excerpts\n\n"
         f"{corpus_block}\n\n"
@@ -374,6 +388,7 @@ async def generate(
     claim: str,
     facts: str,
     chunks: list[RetrievedChunk],
+    procedural_posture: str | None = None,
 ) -> GeneratorOutput:
     """
     Generate a structured risk assessment from retrieved chunks.
@@ -398,7 +413,7 @@ async def generate(
 
     valid_chunk_ids = [c.chunk_id for c in chunks]
     tools  = _build_tools(valid_chunk_ids)
-    prompt = _build_prompt(jurisdiction, claim, facts, chunks, thin_corpus)
+    prompt = _build_prompt(jurisdiction, claim, facts, chunks, thin_corpus, procedural_posture)
 
     log.info(
         "generator_call_start",
