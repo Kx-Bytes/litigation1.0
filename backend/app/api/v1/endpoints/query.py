@@ -97,6 +97,7 @@ class QueryResponse(BaseModel):
     strategic_considerations: list[str] = []
     uncertainty_notes: list[str] = []
     confidence_band: str          # "high" | "medium" | "low" | "refused"
+    citation_rate: float = 0.0    # verified / total citations (0.0–1.0)
     dropped_claims: list[str] = []
     model: str = ""
     latency_ms: int = 0
@@ -254,6 +255,9 @@ async def submit_query(
             )
             dropped_claims.append(label)
 
+        total_cits = len(verified_output.verified_citations) + len(verified_output.dropped_citations)
+        citation_rate = len(verified_output.verified_citations) / total_cits if total_cits else 0.0
+
         response = QueryResponse(
             query_id=query_id,
             risk_assessment=RiskAssessment(
@@ -264,6 +268,7 @@ async def submit_query(
             strategic_considerations=verified_output.strategic_considerations,
             uncertainty_notes=verified_output.uncertainty_notes,
             confidence_band=band,
+            citation_rate=citation_rate,
             dropped_claims=dropped_claims,
             model=verified_output.model,
             latency_ms=latency_ms,

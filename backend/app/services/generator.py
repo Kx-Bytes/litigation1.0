@@ -163,7 +163,7 @@ def _build_tools(valid_chunk_ids: list[str]) -> list[dict]:
                         },
                         "comparable_cases": {
                             "type": "array",
-                            "description": "Up to 5 most directly comparable cases from the retrieved chunks.",
+                            "description": "Up to 8 most directly comparable cases from the retrieved chunks.",
                             "items": {
                                 "type": "object",
                                 "properties": {
@@ -183,7 +183,7 @@ def _build_tools(valid_chunk_ids: list[str]) -> list[dict]:
                                 },
                                 "required": ["chunk_id", "summary", "relevance"],
                             },
-                            "maxItems": 5,
+                            "maxItems": 8,
                         },
                         "strategic_considerations": {
                             "type": "array",

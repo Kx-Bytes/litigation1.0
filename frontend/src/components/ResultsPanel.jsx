@@ -147,7 +147,7 @@ export default function ResultsPanel({ result, query }) {
       </div>
 
       {/* ── Confidence hero ─────────────────────────────────────────────────── */}
-      <ConfidenceBadge band={result.confidence_band || (refused ? 'refused' : 'low')} />
+      <ConfidenceBadge band={result.confidence_band || (refused ? 'refused' : 'low')} citationRate={result.citation_rate} />
 
       {/* ── Refusal card (replaces tabs) ────────────────────────────────────── */}
       {refused && <RefusalCard refusal={result.refusal} />}

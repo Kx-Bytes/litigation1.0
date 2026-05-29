@@ -59,10 +59,12 @@ const SW   = 7           // stroke width
 const CIRC = 2 * Math.PI * R   // full circumference ≈ 238.76
 
 /* ─────────────────────────────────────────────────────────────────────────── */
-export default function ConfidenceBadge({ band }) {
+export default function ConfidenceBadge({ band, citationRate }) {
   const cfg  = CONFIG[band] || CONFIG.low
   const Icon = cfg.icon
-  const offset = CIRC * (1 - cfg.pct / 100)
+  // Use real citation rate if provided, else fall back to static config value
+  const pct  = citationRate != null ? Math.round(citationRate * 100) : cfg.pct
+  const offset = CIRC * (1 - pct / 100)
 
   return (
     <motion.div
@@ -174,12 +176,12 @@ export default function ConfidenceBadge({ band }) {
                 boxShadow:  `0 0 10px ${cfg.color}80`,
               }}
               initial={{ width: 0 }}
-              animate={{ width: `${cfg.pct}%` }}
+              animate={{ width: `${pct}%` }}
               transition={{ duration: 1.4, ease: 'easeOut', delay: 0.15 }}
             />
           </div>
 
-          {cfg.pct > 0 && (
+          {pct > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -187,7 +189,7 @@ export default function ConfidenceBadge({ band }) {
               className="mt-1.5 text-xs font-mono"
               style={{ color: cfg.color + 'aa' }}
             >
-              {cfg.pct}% confidence score
+              {pct}% citation verification rate
             </motion.div>
           )}
         </div>
