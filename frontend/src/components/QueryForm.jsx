@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronDown, Calendar, Info,
@@ -36,7 +37,7 @@ const POSTURES = [
   { value: 'TRO',                 label: 'Temporary Restraining Order' },
 ]
 
-export default function QueryForm({ onSubmit, loading, initialValues }) {
+export default function QueryForm({ onSubmit, loading, initialValues, compact = false }) {
   const [jurisdiction,      setJurisdiction]      = useState(initialValues?.jurisdiction || 'US-9th-Cir')
   const [claim,             setClaim]             = useState(initialValues?.claim || '')
   const [facts,             setFacts]             = useState(initialValues?.facts || '')
@@ -51,9 +52,27 @@ export default function QueryForm({ onSubmit, loading, initialValues }) {
   const [uploadError,       setUploadError]       = useState(null)
   const { theme } = useTheme()
 
-  const claimRef   = useRef(null)
-  const factsRef   = useRef(null)
-  const fileInputRef = useRef(null)
+  const [jurPos,     setJurPos]     = useState({ top: 0, left: 0 })
+  const [posturePos, setPosturePos] = useState({ top: 0, left: 0 })
+
+  const claimRef      = useRef(null)
+  const factsRef      = useRef(null)
+  const fileInputRef  = useRef(null)
+  const jurBtnRef     = useRef(null)
+  const postureBtnRef = useRef(null)
+
+  // Sync form fields when initialValues is supplied after mount (e.g. layout switch)
+  useEffect(() => {
+    if (!initialValues) return
+    if (initialValues.claim !== undefined) setClaim(initialValues.claim)
+    if (initialValues.facts !== undefined) setFacts(initialValues.facts)
+    if (initialValues.jurisdiction)        setJurisdiction(initialValues.jurisdiction)
+    if (initialValues.procedural_posture !== undefined) setPosture(initialValues.procedural_posture || '')
+    setTimeout(() => {
+      autoResize(claimRef.current)
+      autoResize(factsRef.current)
+    }, 0)
+  }, [initialValues])
 
   useEffect(() => {
     autoResize(claimRef.current)
@@ -245,8 +264,18 @@ export default function QueryForm({ onSubmit, loading, initialValues }) {
         {/* Jurisdiction selector */}
         <div className="relative" data-jur-dropdown>
           <button
+            ref={jurBtnRef}
             type="button"
-            onClick={() => { setJurOpen(o => !o); setPostureOpen(false) }}
+            onClick={() => {
+              if (jurBtnRef.current) {
+                const r = jurBtnRef.current.getBoundingClientRect()
+                const spaceBelow = window.innerHeight - r.bottom
+                const dropH = Math.min(224, window.innerHeight * 0.5)
+                const top = spaceBelow >= dropH ? r.bottom + 8 : r.top - dropH - 8
+                setJurPos({ top, left: r.left })
+              }
+              setJurOpen(o => !o); setPostureOpen(false)
+            }}
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg
                        bg-white/[0.05] border border-white/10
                        hover:bg-white/[0.09] hover:border-white/20
@@ -257,46 +286,65 @@ export default function QueryForm({ onSubmit, loading, initialValues }) {
             <ChevronDown size={12} className={`text-gray-500 flex-shrink-0 transition-transform duration-150 ${jurOpen ? 'rotate-180' : ''}`} />
           </button>
 
-          <AnimatePresence>
-            {jurOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                transition={{ duration: 0.13 }}
-                className="absolute z-50 bottom-full mb-2 w-72 rounded-xl border shadow-2xl backdrop-blur-xl overflow-hidden"
-                style={{
-                  background: theme === 'dark' ? 'rgba(6,13,31,0.97)' : 'rgba(249,250,251,0.97)',
-                  borderColor: theme === 'dark' ? 'rgba(255,255,255,0.10)' : 'rgba(15,23,42,0.10)',
-                }}
-              >
-                <div className="max-h-56 overflow-y-auto py-1">
-                  {JURISDICTIONS.map(j => (
-                    <button key={j.value} type="button"
-                      onClick={() => { setJurisdiction(j.value); setJurOpen(false) }}
-                      className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-left
-                        ${theme === 'dark' ? 'hover:bg-white/6' : 'hover:bg-black/5'}
-                        ${j.value === jurisdiction
-                          ? theme === 'dark' ? 'bg-indigo-500/12 text-indigo-300' : 'bg-indigo-500/15 text-indigo-700'
-                          : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
-                    >
-                      <span className="text-xs font-mono bg-white/6 px-1.5 py-0.5 rounded w-16 text-center flex-shrink-0 text-gray-400">
-                        {j.short}
-                      </span>
-                      <span className="truncate">{j.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {createPortal(
+            <AnimatePresence>
+              {jurOpen && (
+                <motion.div
+                  data-jur-dropdown
+                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                  transition={{ duration: 0.13 }}
+                  className="w-72 rounded-xl border shadow-2xl backdrop-blur-xl overflow-y-auto"
+                  style={{
+                    position: 'fixed',
+                    zIndex: 9999,
+                    top: jurPos.top,
+                    left: jurPos.left,
+                    maxHeight: `calc(100vh - ${jurPos.top}px - 12px)`,
+                    background: theme === 'dark' ? 'rgba(6,13,31,0.97)' : 'rgba(249,250,251,0.97)',
+                    borderColor: theme === 'dark' ? 'rgba(255,255,255,0.10)' : 'rgba(15,23,42,0.10)',
+                  }}
+                >
+                  <div className="py-1">
+                    {JURISDICTIONS.map(j => (
+                      <button key={j.value} type="button"
+                        onClick={() => { setJurisdiction(j.value); setJurOpen(false) }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-left
+                          ${theme === 'dark' ? 'hover:bg-white/6' : 'hover:bg-black/5'}
+                          ${j.value === jurisdiction
+                            ? theme === 'dark' ? 'bg-indigo-500/12 text-indigo-300' : 'bg-indigo-500/15 text-indigo-700'
+                            : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                      >
+                        <span className="text-xs font-mono bg-white/6 px-1.5 py-0.5 rounded w-16 text-center flex-shrink-0 text-gray-400">
+                          {j.short}
+                        </span>
+                        <span className="truncate">{j.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>,
+            document.body
+          )}
         </div>
 
         {/* Procedural posture selector */}
         <div className="relative" data-posture-dropdown>
           <button
+            ref={postureBtnRef}
             type="button"
-            onClick={() => { setPostureOpen(o => !o); setJurOpen(false) }}
+            onClick={() => {
+              if (postureBtnRef.current) {
+                const r = postureBtnRef.current.getBoundingClientRect()
+                const spaceBelow = window.innerHeight - r.bottom
+                const dropH = Math.min(280, window.innerHeight * 0.5)
+                const top = spaceBelow >= dropH ? r.bottom + 8 : r.top - dropH - 8
+                setPosturePos({ top, left: r.left })
+              }
+              setPostureOpen(o => !o); setJurOpen(false)
+            }}
             className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all duration-150 cursor-pointer ${
               posture
                 ? 'bg-violet-500/15 border-violet-500/30 text-violet-300'
@@ -307,37 +355,46 @@ export default function QueryForm({ onSubmit, loading, initialValues }) {
             <ChevronDown size={12} className={`text-gray-500 flex-shrink-0 transition-transform duration-150 ${postureOpen ? 'rotate-180' : ''}`} />
           </button>
 
-          <AnimatePresence>
-            {postureOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                transition={{ duration: 0.13 }}
-                className="absolute z-50 bottom-full mb-2 w-56 rounded-xl border shadow-2xl backdrop-blur-xl overflow-hidden"
-                style={{
-                  background: theme === 'dark' ? 'rgba(6,13,31,0.97)' : 'rgba(249,250,251,0.97)',
-                  borderColor: theme === 'dark' ? 'rgba(255,255,255,0.10)' : 'rgba(15,23,42,0.10)',
-                }}
-              >
-                <div className="py-1">
-                  {POSTURES.map(p => (
-                    <button key={p.value} type="button"
-                      onClick={() => { setPosture(p.value); setPostureOpen(false) }}
-                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors text-left
-                        ${theme === 'dark' ? 'hover:bg-white/6' : 'hover:bg-black/5'}
-                        ${p.value === posture
-                          ? theme === 'dark' ? 'bg-violet-500/12 text-violet-300' : 'bg-violet-500/15 text-violet-700'
-                          : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
-                    >
-                      {p.value === posture && <CheckCircle size={12} className="text-violet-400 flex-shrink-0" />}
-                      <span className="truncate">{p.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {createPortal(
+            <AnimatePresence>
+              {postureOpen && (
+                <motion.div
+                  data-posture-dropdown
+                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                  transition={{ duration: 0.13 }}
+                  className="w-56 rounded-xl border shadow-2xl backdrop-blur-xl overflow-y-auto"
+                  style={{
+                    position: 'fixed',
+                    zIndex: 9999,
+                    top: posturePos.top,
+                    left: posturePos.left,
+                    maxHeight: `calc(100vh - ${posturePos.top}px - 12px)`,
+                    background: theme === 'dark' ? 'rgba(6,13,31,0.97)' : 'rgba(249,250,251,0.97)',
+                    borderColor: theme === 'dark' ? 'rgba(255,255,255,0.10)' : 'rgba(15,23,42,0.10)',
+                  }}
+                >
+                  <div className="py-1">
+                    {POSTURES.map(p => (
+                      <button key={p.value} type="button"
+                        onClick={() => { setPosture(p.value); setPostureOpen(false) }}
+                        className={`w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-colors text-left
+                          ${theme === 'dark' ? 'hover:bg-white/6' : 'hover:bg-black/5'}
+                          ${p.value === posture
+                            ? theme === 'dark' ? 'bg-violet-500/12 text-violet-300' : 'bg-violet-500/15 text-violet-700'
+                            : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                      >
+                        {p.value === posture && <CheckCircle size={12} className="text-violet-400 flex-shrink-0" />}
+                        <span className="truncate">{p.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>,
+            document.body
+          )}
         </div>
 
         {/* Spacer */}
@@ -411,11 +468,15 @@ export default function QueryForm({ onSubmit, loading, initialValues }) {
             onChange={e => { setClaim(e.target.value); autoResize(e.target) }}
             placeholder="e.g. Agency unlawfully failed to designate critical habitat under ESA § 4"
             className="input-field flex-1 resize-none leading-relaxed text-sm"
-            data-max-h="120"
-            rows={2}
+            data-max-h={compact ? "100" : "120"}
+            rows={compact ? 2 : 2}
             required
             maxLength={500}
-            style={{ minHeight: '3.5rem', maxHeight: '7.5rem', overflowY: 'auto' }}
+            style={{
+              minHeight: compact ? '3.5rem' : '3.5rem',
+              maxHeight: compact ? '6rem'   : '7.5rem',
+              overflowY: 'auto',
+            }}
           />
         </div>
       </div>
@@ -434,10 +495,14 @@ export default function QueryForm({ onSubmit, loading, initialValues }) {
               onChange={e => { setFacts(e.target.value); autoResize(e.target) }}
               placeholder="Parties, statutes, agency conduct, dates, injuries…"
               className="input-field w-full resize-none leading-relaxed text-sm pr-14"
-              data-max-h="220"
-              rows={5}
+              data-max-h={compact ? "180" : "220"}
+              rows={compact ? 4 : 5}
               maxLength={4000}
-              style={{ minHeight: '8rem', maxHeight: '13.75rem', overflowY: 'auto' }}
+              style={{
+                minHeight: compact ? '6rem'  : '8rem',
+                maxHeight: compact ? '11rem' : '13.75rem',
+                overflowY: 'auto',
+              }}
             />
 
             {/* Send button */}

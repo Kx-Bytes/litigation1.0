@@ -65,8 +65,7 @@ export default function AboutPage() {
             Why this exists
           </motion.h1>
           <motion.p variants={fadeUp} className="text-gray-400 text-lg max-w-2xl leading-relaxed">
-            An open-source AI platform for animal-advocacy litigation strategy — built during
-            the Open Paws Research & Development Programme, May 2026.
+            An open-source AI platform for animal-advocacy litigation strategy.
           </motion.p>
         </motion.div>
 
@@ -167,55 +166,7 @@ export default function AboutPage() {
           </div>
         </motion.div>
 
-        {/* Project context */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card p-7 mb-10"
-        >
-          <h2 className="font-display text-xl font-bold text-white mb-4">Project context</h2>
-          <div className="space-y-3 text-sm text-gray-400 leading-relaxed">
-            <p>
-              This platform was built as part of the <strong className="text-white">Open Paws Research & Development Programme</strong> — a 14-day
-              internship project following a structured SDLC workflow: Discovery (Days 1–2),
-              Design (Days 3–4), Development (Days 5–11), and Review (Days 12–14).
-            </p>
-            <p>
-              The project is open source and intended to serve as a foundation for the broader
-              Open Paws legal tooling ecosystem. All architecture decisions, design choices, and
-              known limitations are documented in the project repository.
-            </p>
-          </div>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors border border-white/10 hover:border-white/20 rounded-lg px-3 py-2"
-            >
-              <Code2 size={12} />
-              View on GitHub
-              <ExternalLink size={10} />
-            </a>
-            <Link
-              to="/sources"
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-indigo-400 transition-colors border border-white/10 hover:border-indigo-500/30 rounded-lg px-3 py-2"
-            >
-              <Database size={12} />
-              Data sources
-              <ArrowRight size={10} />
-            </Link>
-            <Link
-              to="/examples"
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-indigo-400 transition-colors border border-white/10 hover:border-indigo-500/30 rounded-lg px-3 py-2"
-            >
-              <BookOpen size={12} />
-              Example queries
-              <ArrowRight size={10} />
-            </Link>
-          </div>
-        </motion.div>
+ 
 
         {/* Disclaimer */}
         <motion.div

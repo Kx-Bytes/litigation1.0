@@ -2,6 +2,9 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Build tools needed by eyecite → fast-diff-match-patch (C++ extension)
+RUN apt-get update && apt-get install -y --no-install-recommends g++ && rm -rf /var/lib/apt/lists/*
+
 # Install uv
 RUN pip install uv --no-cache-dir
 

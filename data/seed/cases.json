@@ -8,7 +8,7 @@
     "decision_date": "2019-06-03",
     "title": "Animal Legal Defense Fund v. U.S. Department of Agriculture",
     "citation": "936 F.3d 882 (9th Cir. 2019)",
-    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-us-department-agriculture",
+    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-united-states-department-agriculture",
     "full_text": "The Animal Legal Defense Fund (ALDF) brought suit challenging USDA regulations under the Animal Welfare Act (AWA) that excluded birds, rats, and mice from the definition of 'animal.' The Ninth Circuit held that ALDF had organizational standing to challenge the rule. The court found that ALDF demonstrated an injury in fact because the exclusion of these animals from AWA protections diverted organizational resources and frustrated ALDF's mission to protect animals from cruelty and exploitation. The court noted that organizations can establish standing by showing the challenged conduct caused them to divert resources from other activities. The court remanded for further proceedings on the merits.",
     "metadata": {
       "standing_type": "organizational",
@@ -25,7 +25,7 @@
     "decision_date": "2018-07-26",
     "title": "Animal Legal Defense Fund v. Wasden",
     "citation": "878 F.3d 1184 (9th Cir. 2018)",
-    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-wasden",
+    "source_url": "https://www.animallaw.info/case/animal-legal-def-fund-v-wasden",
     "full_text": "The Ninth Circuit struck down Idaho's 'ag-gag' statute, which criminalized undercover investigations at agricultural facilities. The court held the law violated the First Amendment as a content-based restriction on speech. Applying strict scrutiny, the court found the state's interest in protecting agricultural operations did not justify criminalizing the act of gaining access by misrepresentation to document conditions. The decision is significant for animal-advocacy organizations that rely on undercover investigations to expose animal cruelty. The court also addressed whether the trespass-based provisions could be severed.",
     "metadata": {
       "constitutional_claim": "First Amendment",
@@ -42,7 +42,7 @@
     "decision_date": "2015-07-29",
     "title": "Animal Legal Defense Fund v. Otter",
     "citation": "789 F.3d 1019 (9th Cir. 2015)",
-    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-otter",
+    "source_url": "https://www.animallaw.info/case/animal-legal-def-fund-v-otter",
     "full_text": "An earlier Ninth Circuit case challenging Idaho's ag-gag law at the preliminary injunction stage. The court affirmed a preliminary injunction blocking enforcement of portions of the statute that criminalized applying for employment at an agricultural operation with intent to cause economic injury. The court found plaintiffs demonstrated likelihood of success on the First Amendment claim because the law targeted protected speech activity. This case established the framework later applied in Wasden.",
     "metadata": {
       "constitutional_claim": "First Amendment",
@@ -179,7 +179,7 @@
     "decision_date": "2023-02-09",
     "title": "Animal Legal Defense Fund v. Reynolds",
     "citation": "89 F.4th 1071 (8th Cir. 2023)",
-    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-reynolds",
+    "source_url": "https://www.animallaw.info/case/animal-legal-defense-fund-v-reynolds-0",
     "full_text": "The Eighth Circuit struck down Iowa's ag-gag statute as a First Amendment violation. Applying strict scrutiny, the court found that Iowa's law — which criminalized obtaining access to agricultural facilities under false pretenses — was a content-based restriction on speech. Iowa had argued the statute addressed fraud, but the court found the statute's targeting of animal-agriculture facilities specifically revealed discriminatory intent. The decision deepens the circuit split on ag-gag statutes: the Ninth Circuit (Wasden) and Eighth Circuit have struck down these laws, while the Tenth Circuit (Herrera) has upheld them.",
     "metadata": {
       "constitutional_claim": "First Amendment",
@@ -232,7 +232,7 @@
     "decision_date": "2022-11-04",
     "title": "United Egg Producers v. Becerra",
     "citation": "No. 21-16956 (9th Cir. 2022)",
-    "source_url": "https://www.animallaw.info/case/united-egg-producers-v-becerra",
+    "source_url": "https://www.courtlistener.com/docket/16403741/united-egg-producers-v-becerra/",
     "full_text": "The Ninth Circuit dismissed a pre-enforcement challenge to California's Proposition 12 egg provisions for lack of standing. Plaintiffs could not demonstrate a sufficiently imminent injury because they had not alleged specific plans to sell non-compliant eggs in California. The court's standing analysis focused on the concreteness and imminence requirements under Lujan. The case illustrates the difficulty industry groups face in bringing pre-enforcement challenges to state animal-welfare statutes before suffering direct economic harm.",
     "metadata": {
       "standing_type": "pre-enforcement",
@@ -249,7 +249,7 @@
     "decision_date": "2010-04-20",
     "title": "United States v. Stevens",
     "citation": "559 U.S. 460 (2010)",
-    "source_url": "https://www.animallaw.info/case/united-states-v-stevens",
+    "source_url": "https://www.animallaw.info/case/us-v-stevens",
     "full_text": "The Supreme Court struck down 18 U.S.C. § 48, a federal statute criminalizing depictions of animal cruelty, as a facially overbroad violation of the First Amendment. The Court rejected the government's argument that a categorical First Amendment exception should be created for depictions of animal cruelty. The decision required Congress to redraft the statute more narrowly. It has implications for advocacy organizations that document and publicize animal cruelty, as the Court's reasoning clarifies that such documentation is protected speech.",
     "metadata": {
       "constitutional_claim": "First Amendment",

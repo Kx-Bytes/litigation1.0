@@ -220,6 +220,39 @@ async def _run_pipeline(job_id: str, scraped_docs: list[ScrapedDoc]) -> None:
         )
 
 
+async def _scrape_and_ingest_task(job_id: str, max_pages: int, start_url: str | None) -> None:
+    """Top-level task wrapper — catches and records any unhandled exception."""
+    try:
+        async with AnimalLawScraper() as scraper:
+            scraped_docs = await scraper.scrape_all(
+                start_url=start_url,
+                max_pages=max_pages,
+            )
+        await _run_pipeline(job_id, scraped_docs)
+    except Exception as exc:
+        log.error("ingest_task_crashed", job_id=job_id, error=str(exc), exc_info=True)
+        job = _jobs.get(job_id)
+        if job:
+            job.status = "failed"
+            job.errors.append(f"task crashed: {exc}")
+            job.finished_at = datetime.now(timezone.utc)
+
+
+async def _url_ingest_task(job_id: str, urls: list[str]) -> None:
+    """Top-level task wrapper for URL ingest."""
+    try:
+        async with AnimalLawScraper() as scraper:
+            scraped_docs = await scraper.scrape_urls(urls)
+        await _run_pipeline(job_id, scraped_docs)
+    except Exception as exc:
+        log.error("ingest_task_crashed", job_id=job_id, error=str(exc), exc_info=True)
+        job = _jobs.get(job_id)
+        if job:
+            job.status = "failed"
+            job.errors.append(f"task crashed: {exc}")
+            job.finished_at = datetime.now(timezone.utc)
+
+
 async def start_scrape_and_ingest(
     max_pages: int = 20,
     start_url: str | None = None,
@@ -230,16 +263,7 @@ async def start_scrape_and_ingest(
     """
     job_id = str(uuid.uuid4())
     _jobs[job_id] = IngestJob(job_id=job_id)
-
-    async def _task() -> None:
-        async with AnimalLawScraper() as scraper:
-            scraped_docs = await scraper.scrape_all(
-                start_url=start_url,
-                max_pages=max_pages,
-            )
-        await _run_pipeline(job_id, scraped_docs)
-
-    asyncio.create_task(_task())
+    asyncio.create_task(_scrape_and_ingest_task(job_id, max_pages, start_url))
     return job_id
 
 
@@ -250,11 +274,5 @@ async def start_url_ingest(urls: list[str]) -> str:
     """
     job_id = str(uuid.uuid4())
     _jobs[job_id] = IngestJob(job_id=job_id)
-
-    async def _task() -> None:
-        async with AnimalLawScraper() as scraper:
-            scraped_docs = await scraper.scrape_urls(urls)
-        await _run_pipeline(job_id, scraped_docs)
-
-    asyncio.create_task(_task())
+    asyncio.create_task(_url_ingest_task(job_id, urls))
     return job_id

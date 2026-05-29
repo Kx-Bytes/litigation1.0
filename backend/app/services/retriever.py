@@ -19,7 +19,7 @@ from __future__ import annotations
 from datetime import date
 
 import structlog
-import voyageai
+from openai import AsyncOpenAI
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import Float, cast, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,15 +30,20 @@ from app.models.document import Document
 
 log = structlog.get_logger()
 
-# Voyage client is module-level so it's reused across requests
-_voyage_client: voyageai.AsyncClient | None = None
+EMBED_MODEL = "openai/text-embedding-3-small"
+EMBED_DIM   = 1024
+
+_client: AsyncOpenAI | None = None
 
 
-def _get_voyage_client() -> voyageai.AsyncClient:
-    global _voyage_client
-    if _voyage_client is None:
-        _voyage_client = voyageai.AsyncClient(api_key=settings.voyage_api_key)
-    return _voyage_client
+def _get_client() -> AsyncOpenAI:
+    global _client
+    if _client is None:
+        _client = AsyncOpenAI(
+            api_key=settings.openrouter_api_key,
+            base_url="https://openrouter.ai/api/v1",
+        )
+    return _client
 
 
 def _year_to_start_date(year: int) -> date:
@@ -117,14 +122,14 @@ class RetrievedChunk:
 
 
 async def embed_query(query_text: str) -> list[float]:
-    """Embed a single query string with voyage-3-large."""
-    client = _get_voyage_client()
-    result = await client.embed(
-        texts=[query_text],
-        model="voyage-3-large",
-        input_type="query",
+    """Embed a single query string via OpenRouter (openai/text-embedding-3-small)."""
+    client = _get_client()
+    response = await client.embeddings.create(
+        model=EMBED_MODEL,
+        input=[query_text],
+        dimensions=EMBED_DIM,
     )
-    return result.embeddings[0]
+    return response.data[0].embedding
 
 
 async def retrieve(
@@ -174,7 +179,7 @@ async def retrieve(
             (
                 1
                 - cast(
-                    Chunk.embedding.op("<->")(text(f"'{embedding_literal}'::vector")),
+                    Chunk.embedding.op("<=>")(text(f"'{embedding_literal}'::vector")),
                     Float,
                 )
             ).label("similarity"),
@@ -193,7 +198,7 @@ async def retrieve(
     stmt = (
         stmt
         .order_by(
-            Chunk.embedding.op("<->")(text(f"'{embedding_literal}'::vector"))
+            Chunk.embedding.op("<=>")(text(f"'{embedding_literal}'::vector"))
         )
         .limit(k)
     )

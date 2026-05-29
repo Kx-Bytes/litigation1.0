@@ -45,6 +45,13 @@ export default function ResultsPanel({ result, query }) {
   const uncertaintyNotes = result.uncertainty_notes || []
   const droppedClaims    = result.dropped_claims || []
 
+  /* citation string → source_url lookup for risk factor links */
+  const citationUrlMap = Object.fromEntries(
+    comparableCases
+      .filter(c => c.citation && c.source_url)
+      .map(c => [c.citation, c.source_url])
+  )
+
   /* Only show tabs that have data */
   const availableTabs = ALL_TABS.filter(t => {
     if (t.id === 'risk')     return !refused && riskFactors.length > 0
@@ -244,16 +251,16 @@ export default function ResultsPanel({ result, query }) {
                           }}
                         >
                           <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${
-                            (f.severity || '').toLowerCase() === 'high'   ? 'bg-red-400'     :
-                            (f.severity || '').toLowerCase() === 'medium' ? 'bg-amber-400'   :
+                            (f.weight || '').toLowerCase() === 'high'   ? 'bg-red-400'     :
+                            (f.weight || '').toLowerCase() === 'medium' ? 'bg-amber-400'   :
                             'bg-emerald-400'
                           }`} />
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-semibold text-white leading-snug">
-                              {f.factor_text || f.factor || 'Risk factor'}
+                              {f.label || 'Risk factor'}
                             </div>
-                            {f.severity && (
-                              <div className="text-xs text-gray-600 mt-0.5 capitalize">{f.severity} severity</div>
+                            {f.weight && (
+                              <div className="text-xs text-gray-600 mt-0.5 capitalize">{f.weight} severity</div>
                             )}
                           </div>
                         </motion.div>
@@ -303,7 +310,7 @@ export default function ResultsPanel({ result, query }) {
               {activeTab === 'risk' && (
                 <div className="space-y-3">
                   {riskFactors.map((f, i) => (
-                    <RiskFactorCard key={i} factor={f} index={i} />
+                    <RiskFactorCard key={i} factor={f} index={i} citationUrlMap={citationUrlMap} />
                   ))}
                 </div>
               )}
@@ -571,8 +578,9 @@ function buildExportText(result, query) {
   if (factors.length) {
     lines.push(`RISK FACTORS (${factors.length})`, '────────────────────')
     factors.forEach((f, i) => {
-      lines.push(`${i + 1}. [${f.severity || 'Unknown'}] ${f.factor_text || f.factor || ''}`)
-      if (f.analysis) lines.push(`   ${f.analysis}`)
+      lines.push(`${i + 1}. [${f.weight || 'Unknown'}] ${f.label || ''}`)
+      if (f.discussion) lines.push(`   ${f.discussion}`)
+      if (f.citations?.length) lines.push(`   Citations: ${f.citations.join(' | ')}`)
     })
     lines.push('')
   }

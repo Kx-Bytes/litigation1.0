@@ -276,7 +276,7 @@ export default function HomePage() {
               </span>
             </motion.div>
             <motion.h2 variants={fadeUp} className="font-display text-3xl md:text-4xl font-bold">
-              Built on Verified Precedent
+              Built on Verified Precedhgc
             </motion.h2>
             <motion.p variants={fadeUp} className="text-gray-400 max-w-xl mx-auto">
               Every feature is designed around one principle: assessments must be grounded

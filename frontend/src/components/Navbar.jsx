@@ -28,14 +28,16 @@ export default function Navbar() {
     <nav
       className="fixed top-0 left-0 right-0 z-50"
       style={{
-        background: isDark ? 'rgba(6,13,31,0.80)' : 'rgba(249,250,251,0.78)',
+        background: isDark
+          ? 'rgba(10,8,30,0.92)'
+          : 'rgba(238,236,255,0.92)',
         backdropFilter: 'blur(24px) saturate(150%)',
         borderBottom: isDark
-          ? '1px solid rgba(255,255,255,0.08)'
-          : '1px solid rgba(15,23,42,0.08)',
+          ? '1px solid rgba(99,102,241,0.18)'
+          : '1px solid rgba(99,102,241,0.20)',
         boxShadow: isDark
-          ? '0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.4)'
-          : '0 1px 0 rgba(15,23,42,0.04), 0 4px 24px rgba(15,23,42,0.08)',
+          ? '0 1px 0 rgba(99,102,241,0.08), 0 4px 32px rgba(0,0,0,0.5)'
+          : '0 1px 0 rgba(99,102,241,0.10), 0 4px 24px rgba(99,102,241,0.08)',
       }}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">

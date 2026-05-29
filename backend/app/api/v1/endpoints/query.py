@@ -214,10 +214,13 @@ async def submit_query(
         # Build risk factors — convert internal chunk_ids to citation strings
         risk_factors: list[RiskFactor] = []
         for rf in verified_output.risk_factors:
-            citations = [
-                verified_cite_map.get(cid, cid)   # fall back to chunk_id if lookup misses
-                for cid in rf.chunk_ids
-            ]
+            seen_cits: set[str] = set()
+            citations = []
+            for cid in rf.chunk_ids:
+                cit = verified_cite_map.get(cid, cid)  # fall back to chunk_id if lookup misses
+                if cit not in seen_cits:
+                    seen_cits.add(cit)
+                    citations.append(cit)
             risk_factors.append(
                 RiskFactor(
                     label=rf.label,

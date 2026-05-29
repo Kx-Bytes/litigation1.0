@@ -13,7 +13,11 @@ class Settings(BaseSettings):
     openrouter_api_key: str = ""
     openrouter_model: str = "anthropic/claude-sonnet-4-6"
 
-    # Voyage AI
+    # Anthropic direct (used by parser for Haiku label classification)
+    # If not set, parser falls back to OpenRouter with the same model via openai SDK
+    anthropic_api_key: str = ""
+
+    # Voyage AI (kept for reference, now unused — embeddings via OpenRouter)
     voyage_api_key: str = ""
 
     # App

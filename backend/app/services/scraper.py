@@ -46,14 +46,12 @@ REQUEST_DELAY   = 1.0    # seconds between requests — be polite
 REQUEST_TIMEOUT = 30.0   # seconds per request
 MAX_PAGES       = 100    # safety cap on pagination
 
-# ── CSS selectors (verified against live HTML 2026-05-26) ─────────────────────
+# ── CSS selectors (verified against live HTML 2026-05-29) ─────────────────────
 
-# Listing page — each row in the Drupal views result
-LISTING_ROW_SEL  = "div.view-content .views-row"
-# Link to individual case page within a listing row
-CASE_LINK_SEL    = "a[href*='/case/']"
-# Pager — next page link (Drupal 7 standard)
-PAGER_NEXT_SEL   = "li.pager-next a"
+# Listing page — results rendered as a table; grab case links from first column
+CASE_LINK_SEL    = "td a[href*='/case/']"
+# Pager — next page link
+PAGER_NEXT_SEL   = "a[title='Go to next page']"
 
 # Case detail page — metadata fields
 TITLE_SEL        = ".field-name-field-full-case-name .field-item"
@@ -184,10 +182,7 @@ class AnimalLawScraper:
         tree = HTMLParser(html)
         seen: set[str] = set()
         links: list[str] = []
-        for row in tree.css(LISTING_ROW_SEL):
-            anchor = row.css_first(CASE_LINK_SEL)
-            if not anchor:
-                continue
+        for anchor in tree.css(CASE_LINK_SEL):
             href = anchor.attributes.get("href", "")
             if not href:
                 continue

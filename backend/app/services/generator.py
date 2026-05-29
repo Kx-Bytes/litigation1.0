@@ -40,7 +40,9 @@ log = structlog.get_logger()
 
 # ── Tuning constants ──────────────────────────────────────────────────────────
 
-MIN_SIMILARITY      = 0.65   # cosine similarity floor for "on-point" chunk
+MIN_SIMILARITY      = 0.45   # cosine similarity floor for "on-point" chunk
+                             # NOTE: 0.45 is appropriate for short seed-corpus summaries
+                             # (500–700 chars). Raise toward 0.65 when full case text is loaded.
 REFUSE_THRESHOLD    = 2      # refuse if fewer than this many chunks meet MIN_SIMILARITY
 UNCERTAIN_THRESHOLD = 4      # add uncertainty warning if fewer than this many chunks meet it
 

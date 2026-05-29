@@ -2,7 +2,6 @@
 
 import time
 
-import anthropic
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy import text
@@ -17,7 +16,7 @@ router = APIRouter()
 class HealthResponse(BaseModel):
     status: str          # "ok" | "degraded" | "down"
     postgres: str        # "ok" | "error: ..."
-    anthropic: str       # "ok" | "error: ..."
+    openrouter: str      # "ok" | "error: ..."
     latency_ms: int
 
 
@@ -32,19 +31,15 @@ async def health(db: AsyncSession = Depends(get_db)) -> HealthResponse:
     except Exception as exc:
         pg_status = f"error: {exc}"
 
-    # Anthropic API check (lightweight — just instantiate client, no call)
-    try:
-        _ = anthropic.Anthropic(api_key=settings.anthropic_api_key)
-        ant_status = "ok" if settings.anthropic_api_key else "error: no api key configured"
-    except Exception as exc:
-        ant_status = f"error: {exc}"
+    # OpenRouter key check (this is what the pipeline actually uses)
+    or_status = "ok" if settings.openrouter_api_key else "error: no api key configured"
 
-    overall = "ok" if pg_status == "ok" and ant_status == "ok" else "degraded"
+    overall = "ok" if pg_status == "ok" and or_status == "ok" else "degraded"
     latency = int((time.monotonic() - start) * 1000)
 
     return HealthResponse(
         status=overall,
         postgres=pg_status,
-        anthropic=ant_status,
+        openrouter=or_status,
         latency_ms=latency,
     )
