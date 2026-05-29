@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     # App
     environment: str = "development"
     log_level: str = "INFO"
+    allowed_origins: str = ""  # comma-separated, e.g. "https://your-app.vercel.app"
 
     # Query defaults
     default_k: int = 10
