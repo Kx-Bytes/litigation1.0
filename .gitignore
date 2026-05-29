@@ -35,3 +35,4 @@ pgdata/
 # Secrets / keys
 *.pem
 *.key
+litigation_dump.sql
