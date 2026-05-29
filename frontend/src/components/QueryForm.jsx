@@ -147,8 +147,8 @@ export default function QueryForm({ onSubmit, loading, initialValues, compact = 
       ...(posture ? { procedural_posture: posture } : {}),
       options: {
         k,
-        ...(dateFrom ? { date_from: dateFrom } : {}),
-        ...(dateTo   ? { date_to:   dateTo   } : {}),
+        ...(dateFrom ? { date_from: new Date(dateFrom).getFullYear() } : {}),
+        ...(dateTo   ? { date_to:   new Date(dateTo).getFullYear()   } : {}),
       },
     })
   }
