@@ -1,7 +1,9 @@
 import axios from 'axios'
 
 const client = axios.create({
-  baseURL: 'https://litigation10-production.up.railway.app/api/v1',
+  baseURL: import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/api/v1`
+    : '/api/v1',
 })
 
 export async function submitQuery({ jurisdiction, claim, facts, procedural_posture, options = {} }) {
