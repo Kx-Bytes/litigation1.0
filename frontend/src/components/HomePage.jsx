@@ -234,7 +234,7 @@ export default function HomePage() {
              style={{ backgroundImage: 'radial-gradient(rgba(99,102,241,0.08) 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
         <div className="relative max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { value: 16, suffix: '+', label: 'Seed Cases',            duration: 1200 },
+            { value: 5,  suffix: '+',  label: 'Circuits Covered',      duration: 1200 },
             { value: 13, suffix: '',  label: 'Circuits Covered',      duration: 1500 },
             { value: 3,  suffix: 'x', label: 'Citation Checks',       duration: 900  },
             { value: 0,  suffix: '',  label: 'Hallucinated Citations', duration: 600  },

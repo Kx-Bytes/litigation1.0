@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lex &amp; Co. — Premier Legal Counsel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --forest:    #0D3B36;
+      --emerald:   #123F3A;
+      --charcoal:  #1E2F2C;
+      --ivory:     #F5F1EB;
+      --beige:     #ECE7DF;
+      --cream:     #FAF7F2;
+      --gold:      #A67C52;
+      --brown:     #8B5E3C;
+      --slate:     #22302D;
+      --gray-g:    #6B756F;
+      --white:     #FFFFFF;
+      --r20: 20px;
+      --r24: 24px;
+      --r28: 28px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--cream);
+      color: var(--slate);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    img { display: block; max-width: 100%; }
+    a   { text-decoration: none; color: inherit; }
+    ul  { list-style: none; }
+
+    /* ─── Scroll reveal utility ────────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.75s cubic-bezier(0.22,1,0.36,1),
+                  transform 0.75s cubic-bezier(0.22,1,0.36,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal.delay-1 { transition-delay: 0.10s; }
+    .reveal.delay-2 { transition-delay: 0.20s; }
+    .reveal.delay-3 { transition-delay: 0.30s; }
+    .reveal.delay-4 { transition-delay: 0.40s; }
+    .reveal.delay-5 { transition-delay: 0.55s; }
+
+    /* ─── Section label pill ───────────────────────────────────────────── */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gray-g);
+      margin-bottom: 20px;
+    }
+    .section-label .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--forest);
+      flex-shrink: 0;
+    }
+
+    /* ─── Pill Button ──────────────────────────────────────────────────── */
+    .btn-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 6px 0 28px;
+      height: 56px;
+      border-radius: 100px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      white-space: nowrap;
+    }
+    .btn-pill:hover { transform: scale(1.03); box-shadow: 0 12px 32px rgba(0,0,0,0.18); }
+    .btn-pill .arrow-circle {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    .btn-pill:hover .arrow-circle { transform: translateX(3px); }
+
+    .btn-dark {
+      background: var(--forest);
+      color: var(--white);
+    }
+    .btn-dark .arrow-circle {
+      background: rgba(255,255,255,0.14);
+      color: white;
+    }
+
+    .btn-light {
+      background: var(--ivory);
+      color: var(--forest);
+    }
+    .btn-light .arrow-circle {
+      background: var(--forest);
+      color: white;
+    }
+
+    /* ─── NAVBAR ───────────────────────────────────────────────────────── */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 60px;
+      height: 76px;
+      transition: background 0.35s ease, backdrop-filter 0.35s ease, box-shadow 0.35s ease;
+    }
+    #navbar.scrolled {
+      background: rgba(13,59,54,0.88);
+      backdrop-filter: blur(18px) saturate(160%);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--white);
+      letter-spacing: 0.04em;
+    }
+    .nav-logo span { font-style: italic; color: rgba(255,255,255,0.75); }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      color: rgba(255,255,255,0.82);
+      position: relative;
+      padding-bottom: 3px;
+      transition: color 0.2s ease;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 1px;
+      background: rgba(255,255,255,0.55);
+      transition: width 0.28s ease;
+    }
+    .nav-links a:hover { color: white; }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta {
+      padding: 10px 22px;
+      border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.30);
+      font-size: 13px;
+      font-weight: 500;
+      color: white;
+      letter-spacing: 0.05em;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .nav-cta:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.50); }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px; height: 1.5px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 76px; left: 0; right: 0;
+      background: rgba(13,59,54,0.97);
+      backdrop-filter: blur(20px);
+      padding: 30px 40px 40px;
+      flex-direction: column;
+      gap: 0;
+      z-index: 99;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 18px;
+      font-family: 'Cormorant Garamond', serif;
+      color: rgba(255,255,255,0.90);
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── HERO ─────────────────────────────────────────────────────────── */
+    #hero {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Background: cinematic courthouse image via a CSS gradient stand-in */
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(0,0,0,0.62) 55%, rgba(0,0,0,0.10) 100%),
+        url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1800&q=80&auto=format&fit=crop') center/cover no-repeat;
+      filter: saturate(0.7);
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(160deg, rgba(13,59,54,0.45) 0%, transparent 60%);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      min-height: 100vh;
+      padding-top: 76px;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: 40px;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+    .hero-tag .line {
+      width: 32px; height: 1px;
+      background: rgba(255,255,255,0.45);
+    }
+    .hero-tag span {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.20em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .hero-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(54px, 7vw, 88px);
+      font-weight: 300;
+      line-height: 1.05;
+      color: var(--white);
+      margin-bottom: 28px;
+    }
+    .hero-heading em {
+      font-style: italic;
+      font-weight: 300;
+      color: rgba(255,255,255,0.80);
+    }
+
+    .hero-sub {
+      font-size: 15px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.62);
+      max-width: 400px;
+      margin-bottom: 44px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 48px;
+      margin-top: 56px;
+      padding-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.12);
+    }
+    .stat-item {}
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 44px;
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.50);
+      text-transform: uppercase;
+    }
+
+    /* Right side statue image */
+    .hero-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-end;
+      height: 100vh;
+    }
+    .hero-statue {
+      height: 88vh;
+      width: auto;
+      max-width: 480px;
+      object-fit: cover;
+      object-position: top center;
+      border-radius: 28px 28px 0 0;
+      filter: brightness(0.82) contrast(1.08) sepia(0.12);
+      box-shadow: -30px 0 80px rgba(0,0,0,0.35);
+    }
+
+    /* ─── LEGACY / ABOUT ───────────────────────────────────────────────── */
+    #legacy {
+      background: var(--ivory);
+      padding: 120px 60px;
+    }
+    .legacy-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    .legacy-img-wrap {
+      position: relative;
+    }
+    .legacy-img {
+      width: 100%;
+      height: 580px;
+      object-fit: cover;
+      border-radius: var(--r24);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.14);
+      filter: saturate(0.85) brightness(0.96);
+    }
+    .legacy-img-badge {
+      position: absolute;
+      bottom: -24px;
+      right: -24px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--forest);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 36px rgba(13,59,54,0.35);
+    }
+    .legacy-img-badge .b-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 38px;
+      font-weight: 400;
+      color: white;
+      line-height: 1;
+    }
+    .legacy-img-badge .b-label {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.60);
+      text-align: center;
+      margin-top: 4px;
+      max-width: 80px;
+    }
+
+    .legacy-content {}
+    .legacy-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(38px, 4.5vw, 56px);
+      font-weight: 400;
+      line-height: 1.12;
+      color: var(--forest);
+      margin-bottom: 24px;
+    }
+    .legacy-heading em { font-style: italic; font-weight: 300; }
+
+    .legacy-body {
+      font-size: 15px;
+      line-height: 1.85;
+      color: var(--gray-g);
+      margin-bottom: 48px;
+      max-width: 520px;
+    }
+
+    .legacy-stats {
+      display: flex;
+      gap: 44px;
+      padding-top: 36px;
+      border-top: 1px solid rgba(13,59,54,0.12);
+      margin-top: 8px;
+    }
+    .legacy-stat .ls-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 46px;
+      font-weight: 400;
+      color: var(--forest);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .legacy-stat .ls-label {
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--gray-g);
+    }
+
+    /* ─── PRACTICE AREAS ───────────────────────────────────────────────── */
+    #practice {
+      background: var(--cream);
+      padding: 120px 60px;
+    }
+    .practice-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .practice-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 64px;
+    }
+    .practice-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 400;
+      line-height: 1.12;
+      color: var(--forest);
+    }
+    .practice-heading em { font-style: italic; }
+
+    .practice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .practice-card {
+      background: var(--ivory);
+      border-radius: var(--r24);
+      padding: 40px 36px;
+      border: 1px solid rgba(13,59,54,0.07);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: transform 0.30s cubic-bezier(0.22,1,0.36,1),
+                  box-shadow 0.30s ease,
+                  border-color 0.30s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .practice-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.10);
+      border-color: rgba(13,59,54,0.18);
+    }
+
+    .pc-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: rgba(13,59,54,0.07);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .pc-icon svg { width: 22px; height: 22px; stroke: var(--forest); fill: none; stroke-width: 1.5; }
+
+    .pc-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--slate);
+      line-height: 1.25;
+    }
+    .pc-desc {
+      font-size: 13.5px;
+      line-height: 1.70;
+      color: var(--gray-g);
+      flex: 1;
+    }
+    .pc-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--forest);
+      margin-top: 4px;
+      transition: gap 0.25s ease;
+    }
+    .practice-card:hover .pc-arrow { gap: 14px; }
+    .pc-arrow svg { width: 14px; height: 14px; stroke: var(--forest); fill: none; stroke-width: 2; }
+
+    /* ─── ATTORNEYS ────────────────────────────────────────────────────── */
+    #attorneys {
+      background: var(--beige);
+      padding: 120px 60px;
+    }
+    .attorneys-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .attorneys-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 64px;
+    }
+    .attorneys-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 400;
+      line-height: 1.12;
+      color: var(--forest);
+    }
+    .attorneys-heading em { font-style: italic; }
+
+    .attorneys-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .attorney-card {
+      border-radius: var(--r24);
+      overflow: hidden;
+      background: var(--ivory);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      cursor: pointer;
+      position: relative;
+    }
+    .attorney-img-wrap {
+      width: 100%;
+      height: 320px;
+      overflow: hidden;
+      position: relative;
+    }
+    .attorney-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      filter: saturate(0.75) brightness(0.96);
+      transition: transform 0.50s cubic-bezier(0.22,1,0.36,1),
+                  filter 0.50s ease;
+    }
+    .attorney-card:hover .attorney-img {
+      transform: scale(1.05);
+      filter: saturate(0.88) brightness(1.02);
+    }
+    .attorney-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(13,59,54,0.30), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+    .attorney-card:hover .attorney-overlay { opacity: 1; }
+
+    .attorney-info {
+      padding: 22px 24px 26px;
+    }
+    .attorney-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--slate);
+      margin-bottom: 4px;
+    }
+    .attorney-role {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--gray-g);
+      margin-bottom: 16px;
+    }
+    .attorney-socials {
+      display: flex;
+      gap: 10px;
+    }
+    .attorney-socials a {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid rgba(13,59,54,0.16);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .attorney-socials a:hover {
+      background: var(--forest);
+      border-color: var(--forest);
+    }
+    .attorney-socials a:hover svg { stroke: white; }
+    .attorney-socials svg { width: 14px; height: 14px; stroke: var(--gray-g); fill: none; stroke-width: 1.8; }
+
+    /* ─── TESTIMONIALS ─────────────────────────────────────────────────── */
+    #testimonials {
+      background: var(--cream);
+      padding: 120px 60px;
+    }
+    .testimonials-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .testimonials-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 4vw, 52px);
+      font-weight: 400;
+      line-height: 1.12;
+      color: var(--forest);
+      margin-bottom: 64px;
+    }
+    .testimonials-heading em { font-style: italic; }
+
+    .testimonials-track-wrap {
+      overflow: hidden;
+      position: relative;
+    }
+    .testimonials-track {
+      display: flex;
+      gap: 28px;
+      transition: transform 0.55s cubic-bezier(0.22,1,0.36,1);
+    }
+
+    .tcard {
+      min-width: calc(33.333% - 19px);
+      background: var(--ivory);
+      border-radius: var(--r24);
+      padding: 44px 40px;
+      border: 1px solid rgba(13,59,54,0.07);
+      box-shadow: 0 6px 28px rgba(0,0,0,0.05);
+      text-align: left;
+      flex-shrink: 0;
+    }
+
+    .tcard-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 72px;
+      line-height: 0.7;
+      color: rgba(13,59,54,0.15);
+      margin-bottom: 16px;
+      display: block;
+    }
+    .tcard-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 19px;
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.70;
+      color: var(--slate);
+      margin-bottom: 32px;
+    }
+    .tcard-client {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .tcard-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      filter: saturate(0.7);
+    }
+    .tcard-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--slate);
+      margin-bottom: 2px;
+    }
+    .tcard-company {
+      font-size: 11.5px;
+      color: var(--gray-g);
+      letter-spacing: 0.04em;
+    }
+    .tcard-stars {
+      margin-left: auto;
+      display: flex;
+      gap: 3px;
+    }
+    .tcard-stars svg { width: 14px; height: 14px; fill: var(--gold); }
+
+    .testimonials-nav {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 44px;
+    }
+    .t-nav-btn {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      border: 1px solid rgba(13,59,54,0.18);
+      background: transparent;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .t-nav-btn:hover { background: var(--forest); border-color: var(--forest); }
+    .t-nav-btn:hover svg { stroke: white; }
+    .t-nav-btn svg { width: 16px; height: 16px; stroke: var(--forest); fill: none; stroke-width: 2; }
+
+    /* ─── CONTACT ──────────────────────────────────────────────────────── */
+    #contact {
+      background: var(--ivory);
+      padding: 120px 60px;
+    }
+    .contact-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 100px;
+      align-items: start;
+    }
+
+    .contact-left {}
+    .contact-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(38px, 4.5vw, 56px);
+      font-weight: 400;
+      line-height: 1.12;
+      color: var(--forest);
+      margin-bottom: 20px;
+    }
+    .contact-heading em { font-style: italic; }
+
+    .contact-sub {
+      font-size: 15px;
+      line-height: 1.80;
+      color: var(--gray-g);
+      margin-bottom: 48px;
+      max-width: 380px;
+    }
+
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .ci-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .ci-icon {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(13,59,54,0.08);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .ci-icon svg { width: 16px; height: 16px; stroke: var(--forest); fill: none; stroke-width: 1.8; }
+    .ci-text {}
+    .ci-label {
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray-g);
+      margin-bottom: 2px;
+    }
+    .ci-value {
+      font-size: 15px;
+      color: var(--slate);
+      font-weight: 400;
+    }
+
+    /* Contact form */
+    .contact-form {
+      background: var(--cream);
+      border-radius: var(--r28);
+      padding: 50px 48px;
+      border: 1px solid rgba(13,59,54,0.08);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray-g);
+    }
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(13,59,54,0.12);
+      background: var(--beige);
+      color: var(--slate);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder { color: rgba(107,117,111,0.55); }
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: rgba(13,59,54,0.40);
+      box-shadow: 0 0 0 3px rgba(13,59,54,0.07);
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.65;
+    }
+    .form-submit {
+      width: 100%;
+      height: 54px;
+      border-radius: 100px;
+      background: var(--forest);
+      color: white;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+      margin-top: 4px;
+    }
+    .form-submit:hover {
+      background: var(--emerald);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(13,59,54,0.28);
+    }
+
+    /* ─── FOOTER ───────────────────────────────────────────────────────── */
+    #footer {
+      background: var(--forest);
+      padding: 80px 60px 44px;
+    }
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr 1fr;
+      gap: 60px;
+      padding-bottom: 60px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .footer-brand {}
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 500;
+      color: white;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+    }
+    .footer-logo span { font-style: italic; color: rgba(255,255,255,0.65); }
+    .footer-tagline {
+      font-size: 13.5px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.50);
+      max-width: 280px;
+      margin-bottom: 28px;
+    }
+    .footer-socials {
+      display: flex;
+      gap: 10px;
+    }
+    .footer-socials a {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .footer-socials a:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.30); }
+    .footer-socials svg { width: 15px; height: 15px; stroke: rgba(255,255,255,0.65); fill: none; stroke-width: 1.8; }
+
+    .footer-col-title {
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.40);
+      margin-bottom: 22px;
+    }
+    .footer-col ul {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .footer-col ul a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+      transition: color 0.2s ease;
+    }
+    .footer-col ul a:hover { color: white; }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 32px;
+    }
+    .footer-copy {
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.35);
+    }
+    .footer-bottom-links {
+      display: flex;
+      gap: 28px;
+    }
+    .footer-bottom-links a {
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.2s ease;
+    }
+    .footer-bottom-links a:hover { color: rgba(255,255,255,0.70); }
+
+    /* ─── Divider strip between sections ──────────────────────────────── */
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(13,59,54,0.12), transparent);
+    }
+
+    /* ─── RESPONSIVE ───────────────────────────────────────────────────── */
+    @media (max-width: 1100px) {
+      .attorneys-grid { grid-template-columns: repeat(2, 1fr); }
+      .practice-grid  { grid-template-columns: repeat(2, 1fr); }
+      .footer-top     { grid-template-columns: 1fr 1fr; gap: 40px; }
+    }
+
+    @media (max-width: 900px) {
+      #navbar { padding: 0 28px; }
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+
+      .hero-inner {
+        grid-template-columns: 1fr;
+        padding: 0 28px;
+        padding-top: 76px;
+        padding-bottom: 60px;
+      }
+      .hero-left { padding-right: 0; }
+      .hero-right { display: none; }
+      .hero-stats { flex-wrap: wrap; gap: 32px; }
+
+      #legacy, #practice, #attorneys, #testimonials, #contact, #footer {
+        padding-left: 28px; padding-right: 28px;
+      }
+
+      .legacy-inner { grid-template-columns: 1fr; gap: 48px; }
+      .legacy-img-badge { display: none; }
+      .contact-inner { grid-template-columns: 1fr; gap: 60px; }
+      .attorneys-grid { grid-template-columns: repeat(2, 1fr); }
+      .tcard { min-width: calc(85% - 14px); }
+
+      .practice-header,
+      .attorneys-header { flex-direction: column; align-items: flex-start; gap: 24px; }
+
+      .footer-top { grid-template-columns: 1fr 1fr; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+    }
+
+    @media (max-width: 600px) {
+      .practice-grid  { grid-template-columns: 1fr; }
+      .attorneys-grid { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .footer-top { grid-template-columns: 1fr; }
+      .tcard { min-width: 90%; }
+      .hero-heading { font-size: 46px; }
+      .hero-stats { gap: 24px; }
+      .stat-num { font-size: 36px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════════ -->
+  <nav id="navbar">
+    <a href="#hero" class="nav-logo">Lex <span>&amp; Co.</span></a>
+
+    <ul class="nav-links">
+      <li><a href="#hero">Home</a></li>
+      <li><a href="#legacy">About Us</a></li>
+      <li><a href="#practice">Practice Areas</a></li>
+      <li><a href="#attorneys">Attorneys</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+
+    <a href="#contact" class="nav-cta">Free Consultation</a>
+
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="#hero"      onclick="closeMobile()">Home</a>
+    <a href="#legacy"    onclick="closeMobile()">About Us</a>
+    <a href="#practice"  onclick="closeMobile()">Practice Areas</a>
+    <a href="#attorneys" onclick="closeMobile()">Attorneys</a>
+    <a href="#contact"   onclick="closeMobile()">Contact</a>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════════ -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+
+    <div class="hero-inner">
+      <!-- Left -->
+      <div class="hero-left">
+        <div class="hero-tag reveal">
+          <span class="line"></span>
+          <span>Premier Legal Counsel Since 1989</span>
+        </div>
+
+        <h1 class="hero-heading reveal delay-1">
+          Navigate legal<br>
+          hurdles <em>with ease</em><br>
+          and certainty
+        </h1>
+
+        <p class="hero-sub reveal delay-2">
+          Our attorneys combine deep expertise with a personal approach — delivering precise, strategic counsel that protects your interests at every turn.
+        </p>
+
+        <div class="reveal delay-3">
+          <button class="btn-pill btn-dark">
+            Schedule a Consultation
+            <span class="arrow-circle">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+            </span>
+          </button>
+        </div>
+
+        <div class="hero-stats reveal delay-4">
+          <div class="stat-item">
+            <div class="stat-num">94%</div>
+            <div class="stat-label">Happy Clients</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">1,300+</div>
+            <div class="stat-label">Successful Cases</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">35yr</div>
+            <div class="stat-label">Years of Practice</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: statue -->
+      <div class="hero-right reveal delay-2">
+        <img
+          class="hero-statue"
+          src="https://images.unsplash.com/photo-1575505586569-646b2ca898fc?w=700&q=80&auto=format&fit=crop"
+          alt="Lady Justice"
+        />
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       LEGACY / ABOUT
+  ═══════════════════════════════════════════ -->
+  <section id="legacy">
+    <div class="legacy-inner">
+      <!-- Image -->
+      <div class="legacy-img-wrap reveal">
+        <img
+          class="legacy-img"
+          src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80&auto=format&fit=crop"
+          alt="Legal library"
+        />
+        <div class="legacy-img-badge">
+          <span class="b-num">35+</span>
+          <span class="b-label">Years of Excellence</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="legacy-content">
+        <div class="section-label reveal">
+          <span class="dot"></span>
+          Our Legacy
+        </div>
+
+        <h2 class="legacy-heading reveal delay-1">
+          A Tradition of<br><em>Legal Excellence</em>
+        </h2>
+
+        <p class="legacy-body reveal delay-2">
+          Founded in 1989, Lex &amp; Co. has built a reputation grounded in integrity, precision, and an unwavering commitment to client outcomes. Our team of seasoned attorneys brings decades of combined experience across corporate, criminal, family, and international law — representing individuals, institutions, and leading enterprises with equal dedication.
+        </p>
+        <p class="legacy-body reveal delay-3" style="margin-top:-28px;">
+          We believe that exceptional legal counsel is not merely reactive — it is strategic, anticipatory, and deeply personal. Every matter we undertake is guided by the same principle: your success is our measure.
+        </p>
+
+        <div class="reveal delay-3">
+          <button class="btn-pill btn-dark" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            Meet Our Team
+            <span class="arrow-circle">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+            </span>
+          </button>
+        </div>
+
+        <div class="legacy-stats reveal delay-4">
+          <div class="legacy-stat">
+            <div class="ls-num">35+</div>
+            <div class="ls-label">Years of Excellence</div>
+          </div>
+          <div class="legacy-stat">
+            <div class="ls-num">500+</div>
+            <div class="ls-label">Cases Won</div>
+          </div>
+          <div class="legacy-stat">
+            <div class="ls-num">98%</div>
+            <div class="ls-label">Client Satisfaction</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- ═══════════════════════════════════════════
+       PRACTICE AREAS
+  ═══════════════════════════════════════════ -->
+  <section id="practice">
+    <div class="practice-inner">
+      <div class="practice-header">
+        <div>
+          <div class="section-label reveal"><span class="dot"></span>What We Do</div>
+          <h2 class="practice-heading reveal delay-1">
+            Our Areas of<br><em>Legal Practice</em>
+          </h2>
+        </div>
+        <div class="reveal delay-2">
+          <button class="btn-pill btn-light" style="border: 1px solid rgba(13,59,54,0.18);">
+            View All Services
+            <span class="arrow-circle">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="practice-grid">
+
+        <!-- Corporate Law -->
+        <div class="practice-card reveal">
+          <div class="pc-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+          </div>
+          <div class="pc-title">Corporate Law</div>
+          <div class="pc-desc">Strategic counsel for mergers, acquisitions, governance, compliance, and all facets of business law for enterprises of every scale.</div>
+          <span class="pc-arrow">Learn More <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></span>
+        </div>
+
+        <!-- Criminal Defense -->
+        <div class="practice-card reveal delay-1">
+          <div class="pc-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="pc-title">Criminal Defense</div>
+          <div class="pc-desc">Rigorous, fearless defense representation in state and federal courts — protecting your rights from investigation through trial.</div>
+          <span class="pc-arrow">Learn More <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></span>
+        </div>
+
+        <!-- Family Law -->
+        <div class="practice-card reveal delay-2">
+          <div class="pc-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="pc-title">Family Law</div>
+          <div class="pc-desc">Compassionate and decisive guidance through divorce, custody, adoption, and all domestic matters that impact your family's future.</div>
+          <span class="pc-arrow">Learn More <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></span>
+        </div>
+
+        <!-- Intellectual Property -->
+        <div class="practice-card reveal delay-1">
+          <div class="pc-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="pc-title">Intellectual Property</div>
+          <div class="pc-desc">Protecting your innovations, trademarks, and creative work with comprehensive IP strategy, registration, and enforcement.</div>
+          <span class="pc-arrow">Learn More <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></span>
+        </div>
+
+        <!-- Real Estate Law -->
+        <div class="practice-card reveal delay-2">
+          <div class="pc-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+          </div>
+          <div class="pc-title">Real Estate Law</div>
+          <div class="pc-desc">Expert guidance on property transactions, title disputes, development contracts, zoning, and commercial leasing matters.</div>
+          <span class="pc-arrow">Learn More <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></span>
+        </div>
+
+        <!-- Litigation -->
+        <div class="practice-card reveal delay-3">
+          <div class="pc-icon">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+          </div>
+          <div class="pc-title">Litigation</div>
+          <div class="pc-desc">Tenacious courtroom advocacy and dispute resolution for commercial, civil, and regulatory matters at every level of the judiciary.</div>
+          <span class="pc-arrow">Learn More <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg></span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- ═══════════════════════════════════════════
+       ATTORNEYS
+  ═══════════════════════════════════════════ -->
+  <section id="attorneys">
+    <div class="attorneys-inner">
+      <div class="attorneys-header">
+        <div>
+          <div class="section-label reveal"><span class="dot"></span>Our Team</div>
+          <h2 class="attorneys-heading reveal delay-1">
+            Meet Our <em>Distinguished</em><br>Attorneys
+          </h2>
+        </div>
+        <div class="reveal delay-2">
+          <button class="btn-pill btn-dark">
+            Full Team Directory
+            <span class="arrow-circle">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="8" x2="13" y2="8"/><polyline points="9,4 13,8 9,12"/></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="attorneys-grid">
+
+        <div class="attorney-card reveal">
+          <div class="attorney-img-wrap">
+            <img class="attorney-img"
+              src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&q=80&auto=format&fit=crop"
+              alt="James Hartwell" />
+            <div class="attorney-overlay"></div>
+          </div>
+          <div class="attorney-info">
+            <div class="attorney-name">James Hartwell</div>
+            <div class="attorney-role">Managing Partner — Corporate</div>
+            <div class="attorney-socials">
+              <a href="#"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+              <a href="#"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="attorney-card reveal delay-1">
+          <div class="attorney-img-wrap">
+            <img class="attorney-img"
+              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=500&q=80&auto=format&fit=crop"
+              alt="Catherine Moss" />
+            <div class="attorney-overlay"></div>
+          </div>
+          <div class="attorney-info">
+            <div class="attorney-name">Catherine Moss</div>
+            <div class="attorney-role">Senior Partner — Litigation</div>
+            <div class="attorney-socials">
+              <a href="#"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+              <a href="#"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="attorney-card reveal delay-2">
+          <div class="attorney-img-wrap">
+            <img class="attorney-img"
+              src="https://images.unsplash.com/photo-1556157382-97eda2d62296?w=500&q=80&auto=format&fit=crop"
+              alt="Marcus Delroy" />
+            <div class="attorney-overlay"></div>
+          </div>
+          <div class="attorney-info">
+            <div class="attorney-name">Marcus Delroy</div>
+            <div class="attorney-role">Partner — Criminal Defense</div>
+            <div class="attorney-socials">
+              <a href="#"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+              <a href="#"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="attorney-card reveal delay-3">
+          <div class="attorney-img-wrap">
+            <img class="attorney-img"
+              src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500&q=80&auto=format&fit=crop"
+              alt="Sophia Larkin" />
+            <div class="attorney-overlay"></div>
+          </div>
+          <div class="attorney-info">
+            <div class="attorney-name">Sophia Larkin</div>
+            <div class="attorney-role">Associate — Family Law</div>
+            <div class="attorney-socials">
+              <a href="#"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+              <a href="#"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- ═══════════════════════════════════════════
+       TESTIMONIALS
+  ═══════════════════════════════════════════ -->
+  <section id="testimonials">
+    <div class="testimonials-inner">
+      <div class="section-label reveal" style="justify-content:center;">
+        <span class="dot"></span>Client Testimonials
+      </div>
+      <h2 class="testimonials-heading reveal delay-1">
+        Words From Those<br><em>We've Served</em>
+      </h2>
+
+      <div class="testimonials-track-wrap">
+        <div class="testimonials-track" id="ttrack">
+
+          <div class="tcard reveal">
+            <span class="tcard-quote">"</span>
+            <p class="tcard-text">Lex &amp; Co. handled our merger with extraordinary precision. Their ability to anticipate complications — and resolve them before they became problems — was remarkable. I wouldn't trust this work to anyone else.</p>
+            <div class="tcard-client">
+              <img class="tcard-avatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80&auto=format&fit=crop" alt="Robert Chen" />
+              <div>
+                <div class="tcard-name">Robert Chen</div>
+                <div class="tcard-company">CEO, Meridian Capital Group</div>
+              </div>
+              <div class="tcard-stars">
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="tcard reveal delay-1">
+            <span class="tcard-quote">"</span>
+            <p class="tcard-text">Catherine Moss represented me in a complex custody dispute and secured an outcome I genuinely didn't believe was possible. Her composure under pressure and deep empathy made an unbearable process bearable.</p>
+            <div class="tcard-client">
+              <img class="tcard-avatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80&auto=format&fit=crop" alt="Anika Patel" />
+              <div>
+                <div class="tcard-name">Anika Patel</div>
+                <div class="tcard-company">Private Client</div>
+              </div>
+              <div class="tcard-stars">
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="tcard reveal delay-2">
+            <span class="tcard-quote">"</span>
+            <p class="tcard-text">From our first consultation, it was clear Lex &amp; Co. operates at a different level. Their IP team protected our portfolio across four jurisdictions simultaneously — with the thoroughness of a firm twice their size.</p>
+            <div class="tcard-client">
+              <img class="tcard-avatar" src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&q=80&auto=format&fit=crop" alt="Derek Okafor" />
+              <div>
+                <div class="tcard-name">Derek Okafor</div>
+                <div class="tcard-company">CTO, NovaTech Systems</div>
+              </div>
+              <div class="tcard-stars">
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="tcard reveal delay-3">
+            <span class="tcard-quote">"</span>
+            <p class="tcard-text">James Hartwell guided our company through a federal regulatory investigation with the kind of calm authority that only comes from genuine mastery. We emerged with our reputation — and our business — completely intact.</p>
+            <div class="tcard-client">
+              <img class="tcard-avatar" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80&auto=format&fit=crop" alt="William Park" />
+              <div>
+                <div class="tcard-name">William Park</div>
+                <div class="tcard-company">President, Westbrook Industries</div>
+              </div>
+              <div class="tcard-stars">
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+                <svg viewBox="0 0 24 24"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="testimonials-nav">
+        <button class="t-nav-btn" id="t-prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+        </button>
+        <button class="t-nav-btn" id="t-next" aria-label="Next">
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+
+  <!-- ═══════════════════════════════════════════
+       CONTACT
+  ═══════════════════════════════════════════ -->
+  <section id="contact">
+    <div class="contact-inner">
+      <!-- Left -->
+      <div class="contact-left">
+        <div class="section-label reveal"><span class="dot"></span>Get In Touch</div>
+        <h2 class="contact-heading reveal delay-1">
+          Begin Your<br><em>Consultation</em><br>Today
+        </h2>
+        <p class="contact-sub reveal delay-2">
+          Our intake team is available Monday through Friday. Initial consultations are confidential, obligation-free, and conducted by a senior attorney.
+        </p>
+
+        <div class="contact-info">
+          <div class="ci-row reveal delay-2">
+            <div class="ci-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="ci-text">
+              <div class="ci-label">Address</div>
+              <div class="ci-value">One Liberty Plaza, 42nd Floor<br>New York, NY 10006</div>
+            </div>
+          </div>
+          <div class="ci-row reveal delay-3">
+            <div class="ci-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.59 1.2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.72 16z"/></svg>
+            </div>
+            <div class="ci-text">
+              <div class="ci-label">Phone</div>
+              <div class="ci-value">+1 (212) 555-0147</div>
+            </div>
+          </div>
+          <div class="ci-row reveal delay-4">
+            <div class="ci-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div class="ci-text">
+              <div class="ci-label">Email</div>
+              <div class="ci-value">counsel@lexandco.com</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Form -->
+      <div class="contact-form reveal delay-1">
+        <div class="section-label" style="margin-bottom:28px;"><span class="dot"></span>Send a Message</div>
+        <form onsubmit="return false;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input class="form-input" type="text" placeholder="James" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input class="form-input" type="text" placeholder="Hartwell" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input class="form-input" type="email" placeholder="you@example.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input class="form-input" type="tel" placeholder="+1 (212) 000-0000" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:18px;">
+            <label class="form-label">Practice Area</label>
+            <select class="form-input" style="cursor:pointer;">
+              <option value="" disabled selected>Select an area of interest</option>
+              <option>Corporate Law</option>
+              <option>Criminal Defense</option>
+              <option>Family Law</option>
+              <option>Intellectual Property</option>
+              <option>Real Estate Law</option>
+              <option>Litigation</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:28px;">
+            <label class="form-label">Brief Description</label>
+            <textarea class="form-textarea" placeholder="Please describe your legal matter in brief…"></textarea>
+          </div>
+          <button type="submit" class="form-submit">Request Consultation →</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════ -->
+  <footer id="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+
+        <!-- Brand -->
+        <div class="footer-brand">
+          <div class="footer-logo">Lex <span>&amp; Co.</span></div>
+          <p class="footer-tagline">
+            Premier legal counsel for individuals, institutions, and enterprises — delivered with integrity, precision, and purpose since 1989.
+          </p>
+          <div class="footer-socials">
+            <a href="#" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            </a>
+            <a href="#" aria-label="Twitter/X">
+              <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+            </a>
+            <a href="#" aria-label="Email">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="footer-col">
+          <div class="footer-col-title">Navigation</div>
+          <ul>
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#legacy">About Us</a></li>
+            <li><a href="#attorneys">Our Attorneys</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div>
+
+        <!-- Practice Areas -->
+        <div class="footer-col">
+          <div class="footer-col-title">Practice Areas</div>
+          <ul>
+            <li><a href="#practice">Corporate Law</a></li>
+            <li><a href="#practice">Criminal Defense</a></li>
+            <li><a href="#practice">Family Law</a></li>
+            <li><a href="#practice">Intellectual Property</a></li>
+            <li><a href="#practice">Real Estate Law</a></li>
+            <li><a href="#practice">Litigation</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div class="footer-col">
+          <div class="footer-col-title">Contact</div>
+          <ul>
+            <li><a href="#">One Liberty Plaza, 42nd Fl</a></li>
+            <li><a href="#">New York, NY 10006</a></li>
+            <li><a href="tel:+12125550147">+1 (212) 555-0147</a></li>
+            <li><a href="mailto:counsel@lexandco.com">counsel@lexandco.com</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <span class="footer-copy">© 2026 Lex &amp; Co. All rights reserved.</span>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+          <a href="#">Attorney Advertising Disclosure</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ═══════════════════════════════════════════
+       JAVASCRIPT
+  ═══════════════════════════════════════════ -->
+  <script>
+    /* ── Navbar scroll effect ────────────────────────────────────────── */
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 60) navbar.classList.add('scrolled');
+      else navbar.classList.remove('scrolled');
+    }, { passive: true });
+
+    /* ── Mobile menu ─────────────────────────────────────────────────── */
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+    });
+    function closeMobile() {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    }
+
+    /* ── Scroll reveal ───────────────────────────────────────────────── */
+    const revealEls = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => io.observe(el));
+
+    /* ── Testimonials carousel ───────────────────────────────────────── */
+    const track      = document.getElementById('ttrack');
+    const prevBtn    = document.getElementById('t-prev');
+    const nextBtn    = document.getElementById('t-next');
+    let   tIndex     = 0;
+
+    function getVisible() {
+      const w = window.innerWidth;
+      if (w < 700) return 1;
+      if (w < 1100) return 2;
+      return 3;
+    }
+
+    function updateCarousel() {
+      const cards   = track.querySelectorAll('.tcard');
+      const visible = getVisible();
+      const max     = Math.max(0, cards.length - visible);
+      tIndex        = Math.min(tIndex, max);
+      const cardW   = cards[0].offsetWidth + 28; // gap = 28
+      track.style.transform = `translateX(-${tIndex * cardW}px)`;
+    }
+
+    prevBtn.addEventListener('click', () => { if (tIndex > 0) { tIndex--; updateCarousel(); } });
+    nextBtn.addEventListener('click', () => {
+      const cards   = track.querySelectorAll('.tcard');
+      const visible = getVisible();
+      const max     = Math.max(0, cards.length - visible);
+      if (tIndex < max) { tIndex++; updateCarousel(); }
+    });
+    window.addEventListener('resize', updateCarousel, { passive: true });
+
+    /* Auto-advance every 5s */
+    setInterval(() => {
+      const cards   = track.querySelectorAll('.tcard');
+      const visible = getVisible();
+      const max     = Math.max(0, cards.length - visible);
+      tIndex        = tIndex < max ? tIndex + 1 : 0;
+      updateCarousel();
+    }, 5000);
+  </script>
+</body>
+</html>

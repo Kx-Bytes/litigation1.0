@@ -26,9 +26,9 @@ const SOURCES = [
     status: 'active',
     desc:   'The primary corpus source. The world\'s largest collection of animal law cases, statutes, and legal articles. The scraper targets federal case pages (circuit courts + SCOTUS), filtering out state-court opinions at ingest time.',
     stats:  [
-      { label: 'Seed cases loaded', value: '16' },
       { label: 'Jurisdictions',     value: 'SCOTUS + 5 circuits' },
       { label: 'Scraper status',    value: 'Active' },
+      { label: 'Coverage',          value: 'Growing' },
     ],
     color: 'indigo',
   },
@@ -210,10 +210,9 @@ export default function SourcesPage() {
           <div>
             <div className="font-semibold text-white mb-1">Corpus limitations</div>
             <p className="text-sm text-gray-400 leading-relaxed">
-              The current seed corpus contains 16 federal cases. Assessments on topics with thin
-              coverage will receive a <span className="text-amber-300 font-medium">low</span> or <span className="text-gray-300 font-medium">refused</span> confidence
-              band until the scraper runs at scale. The corpus is designed to grow — confidence bands
-              accurately reflect retrieval depth rather than masking it.
+              The corpus is actively growing. Assessments on topics with thin coverage will receive
+              a <span className="text-amber-300 font-medium">low</span> or <span className="text-gray-300 font-medium">refused</span> confidence
+              band. Confidence bands accurately reflect retrieval depth rather than masking it.
             </p>
           </div>
         </motion.div>
