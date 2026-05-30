@@ -199,24 +199,7 @@ export default function SourcesPage() {
           </div>
         </motion.div>
 
-        {/* Transparency note */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="glass-card border border-amber-500/20 bg-amber-500/5 p-6 flex items-start gap-4"
-        >
-          <AlertTriangle size={18} className="text-amber-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <div className="font-semibold text-white mb-1">Corpus limitations</div>
-            <p className="text-sm text-gray-400 leading-relaxed">
-              The corpus is actively growing. Assessments on topics with thin coverage will receive
-              a <span className="text-amber-300 font-medium">low</span> or <span className="text-gray-300 font-medium">refused</span> confidence
-              band. Confidence bands accurately reflect retrieval depth rather than masking it.
-            </p>
-          </div>
-        </motion.div>
-
+      
       </div>
     </div>
   )

@@ -11,7 +11,7 @@ Helps nonprofit legal teams assess litigation risk, surface relevant federal pre
 ## What it does
 
 1. You describe a legal claim and supporting facts.
-2. The pipeline embeds your query (Voyage AI), retrieves the closest federal precedent from the case database (pgvector HNSW), generates a structured risk assessment (Claude Sonnet with cite-or-refuse tool use), verifies every cited chunk against the database, and computes a calibrated confidence band.
+2. The pipeline embeds your query (voyage-3-large via OpenRouter), retrieves the closest federal precedent from the case database (pgvector HNSW), generates a structured risk assessment (Claude Sonnet 4.6 with cite-or-refuse tool use), verifies every cited chunk against the database, and computes a calibrated confidence band.
 3. You get a structured output: risk factors with citations, comparable cases, strategic considerations, uncertainty notes, and a `high / medium / low / refused` confidence band.
 
 Corpus scope: **federal cases only** — Supreme Court and circuit courts.
@@ -36,7 +36,7 @@ litigation1.0/
 │       ├── components/         # AnalyzePage, HistoryPage, HomePage, ...
 │       ├── hooks/              # useQueryHistory
 │       └── lib/                # api.js (axios), jurisdictions.js
-├── data/seed/cases.json        # 16 federal seed cases
+├── data/                       # case data and seed files
 ├── docs/
 │   ├── stage1-discovery/       # Project Discovery Note (mentor sign-off ✓)
 │   ├── stage2-design/          # Design Doc (mentor sign-off ✓)
@@ -50,7 +50,7 @@ litigation1.0/
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker + Docker Compose v2)
-- API keys for **Voyage AI** and **Anthropic / OpenRouter** (see Environment variables below)
+- API keys for **OpenRouter** (LLM + embeddings) and optionally **Anthropic** directly (see Environment variables below)
 
 ---
 
@@ -62,7 +62,8 @@ git clone <repo-url>
 cd litigation1.0
 
 # 2. Fill in your API keys in .env (file already exists — edit it directly)
-#    Required: VOYAGE_API_KEY, OPENROUTER_API_KEY
+#    Required: OPENROUTER_API_KEY
+#    Optional: ANTHROPIC_API_KEY (used by parser for Haiku label classification)
 
 # 3. Start everything
 docker compose up --build
@@ -117,7 +118,7 @@ pytest tests/test_query.py    # a specific module
 pytest -v --tb=short          # verbose output
 ```
 
-Tests mock all external services (Voyage AI, Anthropic). No live API calls or database required.
+Tests mock all external services (OpenRouter, Anthropic). No live API calls or database required.
 
 ---
 
@@ -131,11 +132,24 @@ Edit the `.env` file in the repo root and fill in:
 | `POSTGRES_USER` | DB user (used by Docker Compose) |
 | `POSTGRES_PASSWORD` | DB password |
 | `POSTGRES_DB` | DB name |
-| `VOYAGE_API_KEY` | Voyage AI API key (embeddings) |
-| `OPENROUTER_API_KEY` | OpenRouter API key (Claude Sonnet) |
-| `OPENROUTER_MODEL` | Model string, e.g. `anthropic/claude-sonnet-4-6` |
+| `OPENROUTER_API_KEY` | OpenRouter API key — used for both LLM (Claude Sonnet 4.6) and embeddings (voyage-3-large) |
+| `OPENROUTER_MODEL` | Model string, default `anthropic/claude-sonnet-4-6` |
+| `ANTHROPIC_API_KEY` | Optional — Anthropic direct key for Haiku label classification in the ingest parser |
+| `VOYAGE_API_KEY` | Optional — kept for reference, embeddings now route via OpenRouter |
 | `ENVIRONMENT` | `development` or `production` |
 | `LOG_LEVEL` | `INFO`, `DEBUG`, etc. |
+
+---
+
+## Data sources
+
+| Source | Status | Notes |
+|--------|--------|-------|
+| [animallaw.info](https://www.animallaw.info) (Michigan State University) | Active | Primary corpus — the world's largest animal law case collection. Scraper targets federal circuit + SCOTUS pages. |
+| [CourtListener / RECAP](https://www.courtlistener.com) (Free Law Project) | Planned | REST API, 4M+ federal opinions, rich metadata |
+| [Caselaw Access Project](https://case.law) (Harvard Law School) | Planned | 6.7M cases, 1658–2020, bulk download |
+
+All state court cases are filtered out at ingest time. Confidence bands honestly reflect how deep the current coverage is for any given query.
 
 ---
 

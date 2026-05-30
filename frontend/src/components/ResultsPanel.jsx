@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Copy, Check, Download, AlertTriangle, Scale,
   Lightbulb, AlertCircle, Trash2, Clock,
   FileText, ShieldAlert, TrendingUp, BarChart2,
+  Image, FileDown, ChevronDown,
 } from 'lucide-react'
 import ConfidenceBadge    from './ConfidenceBadge'
 import RiskFactorCard     from './RiskFactorCard'
@@ -33,8 +34,22 @@ function extractYears(cases) {
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 export default function ResultsPanel({ result, query }) {
-  const [copied,    setCopied]    = useState(false)
-  const [activeTab, setActiveTab] = useState('overview')
+  const [copied,      setCopied]      = useState(false)
+  const [activeTab,   setActiveTab]   = useState('overview')
+  const [exportOpen,  setExportOpen]  = useState(false)
+  const [exporting,   setExporting]   = useState(null)   // 'text' | 'image' | 'pdf'
+  const panelRef    = useRef(null)
+  const exportBtnRef = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (exportBtnRef.current && !exportBtnRef.current.contains(e.target)) {
+        setExportOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   if (!result) return null
 
@@ -78,7 +93,9 @@ export default function ResultsPanel({ result, query }) {
     })
   }
 
-  function handleDownload() {
+  function handleExportText() {
+    setExporting('text')
+    setExportOpen(false)
     const blob = new Blob([buildExportText(result, query)], { type: 'text/plain' })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
@@ -86,11 +103,194 @@ export default function ResultsPanel({ result, query }) {
     a.download = `openpaws-assessment-${result.query_id || Date.now()}.txt`
     a.click()
     URL.revokeObjectURL(url)
+    setTimeout(() => setExporting(null), 1500)
+  }
+
+  async function handleExportImage() {
+    setExporting('image')
+    setExportOpen(false)
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      // Temporarily expand all tabs by rendering a full-report clone
+      const clone = panelRef.current.cloneNode(true)
+      clone.style.position = 'fixed'
+      clone.style.top = '-9999px'
+      clone.style.width = panelRef.current.offsetWidth + 'px'
+      clone.style.background = '#060d1f'
+      document.body.appendChild(clone)
+      // Remove the tab panel and inject all-sections markup via canvas
+      const canvas = await html2canvas(clone, { backgroundColor: '#060d1f', scale: 2, useCORS: true, logging: false })
+      document.body.removeChild(clone)
+      const a = document.createElement('a')
+      a.download = `openpaws-assessment-${result.query_id || Date.now()}.png`
+      a.href = canvas.toDataURL('image/png')
+      a.click()
+    } catch (e) {
+      console.error(e)
+      alert('Image export failed.')
+    }
+    setTimeout(() => setExporting(null), 1500)
+  }
+
+  async function handleExportPDF() {
+    setExporting('pdf')
+    setExportOpen(false)
+    try {
+      const { jsPDF } = await import('jspdf')
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
+      const pageW  = doc.internal.pageSize.getWidth()
+      const pageH  = doc.internal.pageSize.getHeight()
+      const margin = 48
+      const col    = pageW - margin * 2
+      let y = margin
+
+      const addPage = () => { doc.addPage(); y = margin }
+      const checkY  = (needed = 20) => { if (y + needed > pageH - margin) addPage() }
+
+      // Header band
+      doc.setFillColor(10, 21, 55)
+      doc.rect(0, 0, pageW, 70, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(18)
+      doc.setTextColor(200, 210, 255)
+      doc.text('OpenPaws — Litigation Risk Assessment', margin, 32)
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(120, 130, 160)
+      doc.text(`Query ID: ${result.query_id || '—'}   ·   ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, margin, 50)
+      doc.text('Informational only — not legal advice.', margin, 62)
+      y = 90
+
+      // Confidence band
+      const band = (result.confidence_band || 'unknown').toUpperCase()
+      const bandColor = band === 'HIGH' ? [52,211,153] : band === 'MEDIUM' ? [251,191,36] : [248,113,113]
+      doc.setFillColor(...bandColor)
+      doc.roundedRect(margin, y, 80, 22, 4, 4, 'F')
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.setTextColor(10, 21, 55)
+      doc.text(band, margin + 40, y + 15, { align: 'center' })
+      doc.setTextColor(60, 70, 100)
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      doc.text(`Confidence Band  ·  Model: ${result.model || '—'}  ·  ${result.latency_ms ?? '—'}ms`, margin + 90, y + 15)
+      y += 36
+
+      const section = (title) => {
+        checkY(30)
+        doc.setDrawColor(99, 102, 241)
+        doc.setLineWidth(0.5)
+        doc.line(margin, y, margin + col, y)
+        y += 6
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(11)
+        doc.setTextColor(60, 70, 120)
+        doc.text(title, margin, y + 10)
+        y += 20
+      }
+
+      const bodyText = (text, indent = 0, size = 9, color = [55, 65, 81]) => {
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(size)
+        doc.setTextColor(...color)
+        const lines = doc.splitTextToSize(text, col - indent)
+        lines.forEach(line => {
+          checkY(14)
+          doc.text(line, margin + indent, y)
+          y += 13
+        })
+      }
+
+      // Query
+      if (query) {
+        section('Query')
+        bodyText(`Jurisdiction: ${query.jurisdiction}`, 0, 9, [80, 90, 120])
+        bodyText(query.claim, 0, 9.5, [30, 40, 60])
+        if (query.facts) { y += 4; bodyText(query.facts, 0, 9, [80, 90, 110]) }
+        y += 8
+      }
+
+      // Summary
+      if (result.risk_assessment?.summary) {
+        section('Executive Summary')
+        bodyText(result.risk_assessment.summary, 0, 9.5, [30, 40, 60])
+        y += 8
+      }
+
+      // Risk factors
+      const factors = result.risk_assessment?.factors || []
+      if (factors.length) {
+        section(`Risk Factors (${factors.length})`)
+        factors.forEach((f, i) => {
+          checkY(24)
+          doc.setFont('helvetica', 'bold')
+          doc.setFontSize(10)
+          doc.setTextColor(40, 50, 100)
+          doc.text(`${i + 1}. [${f.weight || '?'}]  ${f.label || ''}`, margin, y)
+          y += 14
+          if (f.discussion) bodyText(f.discussion, 10, 9, [70, 80, 100])
+          if (f.citations?.length) {
+            bodyText(`Citations: ${f.citations.join(' | ')}`, 10, 8, [99, 102, 200])
+          }
+          y += 5
+        })
+      }
+
+      // Comparable cases
+      const cases = result.comparable_cases || []
+      if (cases.length) {
+        section(`Comparable Cases (${cases.length})`)
+        cases.forEach((c, i) => {
+          checkY(20)
+          doc.setFont('helvetica', 'bold')
+          doc.setFontSize(9.5)
+          doc.setTextColor(40, 50, 100)
+          doc.text(`${i + 1}.  ${c.citation || c.chunk_id}`, margin, y)
+          y += 13
+          if (c.outcome)    bodyText(`Outcome: ${c.outcome}`, 12, 9, [80, 90, 110])
+          if (c.relevance_note) bodyText(c.relevance_note, 12, 9, [80, 90, 110])
+          if (c.source_url) bodyText(c.source_url, 12, 8, [99, 130, 200])
+          y += 4
+        })
+      }
+
+      // Strategic considerations
+      const strategic = result.strategic_considerations || []
+      if (strategic.length) {
+        section('Strategic Considerations')
+        strategic.forEach((s, i) => { bodyText(`${i + 1}.  ${s}`, 0, 9.5, [30, 40, 60]); y += 3 })
+        y += 5
+      }
+
+      // Uncertainty notes
+      const notes = result.uncertainty_notes || []
+      if (notes.length) {
+        section('Uncertainty Notes')
+        notes.forEach(n => { bodyText(`• ${n}`, 0, 9, [100, 100, 120]); y += 2 })
+        y += 5
+      }
+
+      // Footer on every page
+      const pageCount = doc.internal.getNumberOfPages()
+      for (let p = 1; p <= pageCount; p++) {
+        doc.setPage(p)
+        doc.setFontSize(8)
+        doc.setTextColor(150, 160, 180)
+        doc.text(`OpenPaws · Not legal advice · Page ${p} of ${pageCount}`, pageW / 2, pageH - 20, { align: 'center' })
+      }
+
+      doc.save(`openpaws-assessment-${result.query_id || Date.now()}.pdf`)
+    } catch (e) {
+      console.error(e)
+      alert('PDF export failed: ' + e.message)
+    }
+    setTimeout(() => setExporting(null), 1500)
   }
 
   /* ── Render ─────────────────────────────────────────────────────────────── */
   return (
     <motion.div
+      ref={panelRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -120,6 +320,7 @@ export default function ResultsPanel({ result, query }) {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Copy button */}
           <button
             onClick={handleCopy}
             className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all duration-200"
@@ -132,17 +333,82 @@ export default function ResultsPanel({ result, query }) {
             {copied ? <Check size={12} /> : <Copy size={12} />}
             {copied ? 'Copied!' : 'Copy'}
           </button>
-          <button
-            onClick={handleDownload}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all duration-200"
-            style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(156,163,175,1)',
-            }}
-          >
-            <Download size={12} />Export
-          </button>
+
+          {/* Export dropdown */}
+          <div ref={exportBtnRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setExportOpen(o => !o)}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg transition-all duration-200"
+              style={{
+                background: exportOpen ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.05)',
+                border: exportOpen ? '1px solid rgba(99,102,241,0.35)' : '1px solid rgba(255,255,255,0.1)',
+                color: exportOpen ? 'rgb(165,180,252)' : 'rgba(156,163,175,1)',
+              }}
+            >
+              {exporting ? (
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+                  <Download size={12} />
+                </motion.div>
+              ) : (
+                <Download size={12} />
+              )}
+              Export
+              <ChevronDown size={11} style={{ transform: exportOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+            </button>
+
+            <AnimatePresence>
+              {exportOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
+                  style={{
+                    position: 'absolute', right: 0, top: 'calc(100% + 6px)',
+                    width: 170, zIndex: 50,
+                    background: 'linear-gradient(160deg, rgba(15,23,42,0.97), rgba(10,17,40,0.99))',
+                    border: '1px solid rgba(99,102,241,0.25)',
+                    borderRadius: 12,
+                    boxShadow: '0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)',
+                    overflow: 'hidden',
+                    padding: '5px',
+                  }}
+                >
+                  {[
+                    { id: 'text',  icon: FileText,  label: 'Text (.txt)',  desc: 'Plain text report',   fn: handleExportText  },
+                    { id: 'image', icon: Image,      label: 'Image (.png)', desc: 'Screenshot of panel', fn: handleExportImage },
+                    { id: 'pdf',   icon: FileDown,   label: 'PDF (.pdf)',   desc: 'Rendered document',   fn: handleExportPDF   },
+                  ].map(opt => (
+                    <button
+                      key={opt.id}
+                      onClick={opt.fn}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '9px 10px', borderRadius: 8, border: 'none',
+                        background: exporting === opt.id ? 'rgba(99,102,241,0.15)' : 'transparent',
+                        cursor: 'pointer', textAlign: 'left',
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}
+                      onMouseLeave={e => e.currentTarget.style.background = exporting === opt.id ? 'rgba(99,102,241,0.15)' : 'transparent'}
+                    >
+                      <div style={{
+                        width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+                        background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <opt.icon size={13} color="rgb(165,180,252)" />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: 'rgb(226,232,240)' }}>{opt.label}</div>
+                        <div style={{ fontSize: 10.5, color: 'rgba(156,163,175,0.6)', marginTop: 1 }}>{opt.desc}</div>
+                      </div>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
@@ -157,10 +423,12 @@ export default function ResultsPanel({ result, query }) {
         <div>
           {/* Tab bar */}
           <div
-            className="flex gap-1 p-1 rounded-xl mb-5"
+            className="flex gap-1.5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.10)',
+              borderRadius: 14,
+              padding: '5px',
             }}
           >
             {availableTabs.map(tab => {
@@ -171,19 +439,33 @@ export default function ResultsPanel({ result, query }) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-semibold transition-all duration-200"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200"
                   style={{
-                    background: active ? 'rgba(99,102,241,0.2)' : 'transparent',
-                    border:     active ? '1px solid rgba(99,102,241,0.32)' : '1px solid transparent',
-                    color:      active ? '#a5b4fc' : 'rgba(156,163,175,0.55)',
-                    boxShadow:  active ? '0 0 14px rgba(99,102,241,0.14)' : 'none',
+                    padding: '9px 6px',
+                    fontSize: 13,
+                    background: active
+                      ? 'linear-gradient(135deg, rgba(99,102,241,0.35), rgba(139,92,246,0.25))'
+                      : 'transparent',
+                    border: active
+                      ? '1px solid rgba(99,102,241,0.45)'
+                      : '1px solid transparent',
+                    color: active ? 'rgb(199,210,254)' : 'rgba(156,163,175,0.65)',
+                    boxShadow: active
+                      ? '0 0 18px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.08)'
+                      : 'none',
+                    transform: active ? 'translateY(-1px)' : 'none',
                   }}
                 >
-                  <Icon size={12} />
+                  <Icon size={14} />
                   {tab.label}
                   {count != null && count > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono"
-                          style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(156,163,175,0.7)' }}>
+                    <span style={{
+                      padding: '1px 6px', borderRadius: 99, fontSize: 10.5,
+                      fontFamily: 'monospace', fontWeight: 700,
+                      background: active ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.08)',
+                      color: active ? 'rgb(199,210,254)' : 'rgba(156,163,175,0.6)',
+                      border: active ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
+                    }}>
                       {count}
                     </span>
                   )}

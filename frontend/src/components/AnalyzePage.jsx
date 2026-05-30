@@ -4,7 +4,7 @@ import { AlertTriangle, Sparkles, Scale, Maximize2, Minimize2 } from 'lucide-rea
 import { useLocation } from 'react-router-dom'
 import QueryForm from './QueryForm'
 import ResultsPanel from './ResultsPanel'
-import LoadingSkeleton from './LoadingSkeleton'
+import PipelineLoader from './PipelineLoader'
 import { submitQuery } from '../lib/api'
 import { useQueryHistory } from '../hooks/useQueryHistory'
 
@@ -26,6 +26,7 @@ export default function AnalyzePage() {
     setError(null)
     setResult(null)
     setLastQuery(payload)
+    setInputHidden(true)
     try {
       const data = await submitQuery(payload)
       setResult(data)
@@ -127,20 +128,8 @@ export default function AnalyzePage() {
                 )}
 
                 {loading && (
-                  <div>
-                    <div className="mb-4 glass-card border border-indigo-500/20 bg-indigo-500/5 p-4">
-                      <div className="flex items-center gap-3">
-                        <svg className="animate-spin w-4 h-4 text-indigo-400" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                        </svg>
-                        <div>
-                          <div className="text-xs font-semibold text-indigo-400">Running pipeline…</div>
-                          <div className="text-xs text-gray-500">Embedding → Retrieval → Generation → Verification</div>
-                        </div>
-                      </div>
-                    </div>
-                    <LoadingSkeleton />
+                  <div className="py-8">
+                    <PipelineLoader />
                   </div>
                 )}
 
